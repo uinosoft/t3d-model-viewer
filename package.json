@@ -1,0 +1,25 @@
+{
+  "name": "t3d-model-viewer",
+  "version": "0.0.5",
+  "description": "A model viewer based on t3d.js",
+  "scripts": {
+    "eslint": "eslint js",
+    "eslint-fix": "eslint js --fix",
+    "build": "webpack"
+  },
+  "author": "uino",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "eslint": "^8.1.0",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "glob-to-regexp": "^0.4.1",
+    "gltf-validator": "^2.0.0-dev.3.9",
+    "handlebars-loader": "^1.7.2",
+    "lil-gui": "^0.17.0",
+    "nanobar": "^0.4.2",
+    "simple-dropzone": "^0.8.1"
+  }
+}
