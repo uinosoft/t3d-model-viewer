@@ -1,17 +1,17 @@
 import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2, ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE, Box3, Sphere, DRAW_MODE, Spherical } from 't3d';
-import { OrbitControls } from '../libs/t3d/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from '../libs/t3d/examples/jsm/loaders/glTF/GLTFLoader.js';
-import { GLTFUtils } from '../libs/t3d/examples/jsm/loaders/glTF/GLTFUtils.js';
-import { DRACOLoader } from '../libs/t3d/examples/jsm/loaders/DRACOLoader.js';
-import { Texture2DLoader } from '../libs/t3d/examples/jsm/loaders/Texture2DLoader.js';
-import { RGBELoader } from '../libs/t3d/examples/jsm/loaders/RGBELoader.js';
-import { PMREM } from '../libs/t3d/examples/jsm/PMREM.js';
-import { Clock } from '../libs/t3d/examples/jsm/Clock.js';
-import { SkyBox } from '../libs/t3d/examples/jsm/objects/SkyBox.js';
+import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
+import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
+import { DRACOLoader } from 't3d/examples/jsm/loaders/DRACOLoader.js';
+import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
+import { RGBELoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
+import { PMREM } from 't3d/examples/jsm/PMREM.js';
+import { Clock } from 't3d/examples/jsm/Clock.js';
+import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
 import { default as environmentMap } from './environments.js';
 import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
-import { LensflareMarker } from '../libs/t3d-effect-composer/jsm/lensflare/LensflareMarker.js';
-import { GroundShader } from './viewer//shader/GroundShader.js';
+import { LensflareMarker } from '../node_modules/t3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
+import { GroundShader } from './viewer/shader/GroundShader.js';
 import * as Nanobar from 'nanobar';
 
 DRACOLoader.setDecoderPath('libs/draco/');

@@ -1,12 +1,12 @@
 import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
-import { GeometryUtils } from '../../libs/t3d/examples/jsm/geometries/GeometryUtils.js';
-import { Texture2DLoader } from '../../libs/t3d/examples/jsm/loaders/Texture2DLoader.js';
+import { GeometryUtils } from 't3d/examples/jsm/geometries/GeometryUtils.js';
+import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
 import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask } from 't3d-effect-composer';
-import { UVBuffer } from '../../libs/t3d-effect-composer/jsm/uv/UVBuffer.js';
-import { UVDebugger } from '../../libs/t3d-effect-composer/jsm/uv/UVDebugger.js';
-import { LensflareDebugger } from '../../libs/t3d-effect-composer/jsm/lensflare/LensflareDebugger.js';
-import { LensflareBuffer } from '../../libs/t3d-effect-composer/jsm/lensflare/LensflareBuffer.js';
-import { LensflareEffect } from '../../libs/t3d-effect-composer/jsm/lensflare/LensflareEffect.js';
+import { UVBuffer } from '../../node_modules/t3d-effect-composer/examples/jsm/uv/UVBuffer.js';
+import { UVDebugger } from '../../node_modules/t3d-effect-composer/examples/jsm/uv/UVDebugger.js';
+import { LensflareDebugger } from '../../node_modules/t3d-effect-composer/examples/jsm/lensflare/LensflareDebugger.js';
+import { LensflareBuffer } from '../../node_modules/t3d-effect-composer/examples/jsm/lensflare/LensflareBuffer.js';
+import { LensflareEffect } from '../../node_modules/t3d-effect-composer/examples/jsm/lensflare/LensflareEffect.js';
 
 export class ViewerEffectComposer extends DefaultEffectComposer {
 

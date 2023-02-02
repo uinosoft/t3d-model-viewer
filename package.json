@@ -20,6 +20,8 @@
     "handlebars-loader": "^1.7.2",
     "lil-gui": "^0.17.0",
     "nanobar": "^0.4.2",
-    "simple-dropzone": "^0.8.1"
+    "simple-dropzone": "^0.8.1",
+    "t3d": "^0.1.2",
+    "t3d-effect-composer": "^0.0.7"
   }
 }
