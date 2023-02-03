@@ -12,9 +12,9 @@ import { default as environmentMap } from './environments.js';
 import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
 import { LensflareMarker } from '../node_modules/t3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
 import { GroundShader } from './viewer/shader/GroundShader.js';
-import * as Nanobar from 'nanobar';
+import Nanobar from 'nanobar';
 
-DRACOLoader.setDecoderPath('libs/draco/');
+DRACOLoader.setDecoderPath('/libs/draco/');
 
 export class Viewer {
 
@@ -118,8 +118,8 @@ export class Viewer {
 
 		const lensflareMarker = new LensflareMarker();
 		lensflareMarker.occlusionScale = 0.1;
-		const textureFlare0 = textureLoader.load("./textures/lensflare/lensflare0.png");
-		const textureFlare3 = textureLoader.load("./textures/lensflare/lensflare3.png");
+		const textureFlare0 = textureLoader.load("/textures/lensflare/lensflare0.png");
+		const textureFlare3 = textureLoader.load("/textures/lensflare/lensflare3.png");
 		lensflareMarker.lensflareElements = [
 			{ texture: textureFlare0, color: new Color3(0.2, 0.2, 0.2), scale: 0.6, offset: 0 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.05, offset: 0.6 },
@@ -429,7 +429,7 @@ export class Viewer {
 			this._scene.environment = tex;
 			this._skyBox.texture = tex;
 		} else {
-			this._rgbeLoader.loadAsync(`./textures/${name}.${ext}`).then(textureData => {
+			this._rgbeLoader.loadAsync(`/textures/${name}.${ext}`).then(textureData => {
 				let texture = new Texture2D();
 				texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
 				texture.type = textureData.type;

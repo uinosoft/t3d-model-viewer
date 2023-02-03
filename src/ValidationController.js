@@ -1,6 +1,6 @@
 import { validateBytes } from 'gltf-validator';
 import glob from 'glob-to-regexp';
-import registry from '../libs/gltf-generator-registry.json';
+import registry from './gltf-generator-registry.json';
 
 const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
@@ -10,12 +10,12 @@ export class ValidationController {
 		this.el = el;
 		this.report = null;
 
-		this.toggleTpl = require("../hbs/report_toggle.hbs");
+		this.toggleTpl = Handlebars.templates.report_toggle;
 		this.toggleEl = document.createElement('div');
 		this.toggleEl.classList.add('report-toggle-wrap', 'hidden');
 		this.el.appendChild(this.toggleEl);
 
-		this.reportTpl = require("../hbs/report_template.hbs");
+		this.reportTpl = Handlebars.templates.report_template;
 	}
 
 	validate(data, fileURL, rootPath, fileMap, viewer, response) {

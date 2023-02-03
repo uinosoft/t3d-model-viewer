@@ -2,26 +2,28 @@
   "name": "t3d-model-viewer",
   "version": "0.0.6",
   "description": "A model viewer based on t3d.js",
-  "scripts": {
-    "eslint": "eslint js",
-    "eslint-fix": "eslint js --fix",
-    "build": "webpack"
-  },
   "author": "uino",
   "license": "BSD-3-Clause",
   "devDependencies": {
     "eslint": "^8.1.0",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
+    "handlebars": "^4.7.7",
+    "vite": "^4.1.1"
   },
   "dependencies": {
     "glob-to-regexp": "^0.4.1",
     "gltf-validator": "^2.0.0-dev.3.9",
-    "handlebars-loader": "^1.7.2",
     "lil-gui": "^0.17.0",
     "nanobar": "^0.4.2",
     "simple-dropzone": "^0.8.1",
     "t3d": "^0.1.2",
     "t3d-effect-composer": "^0.0.7"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build-templates": "handlebars ./public/hbs/report_template.handlebars -f ./public/hbs/report_template.precompiled.js && handlebars ./public/hbs/report_toggle.handlebars -f ./public/hbs/report_toggle.precompiled.js",
+    "eslint": "eslint src",
+    "eslint-fix": "eslint src --fix"
   }
 }

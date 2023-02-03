@@ -5,8 +5,11 @@
   <meta charset="UTF-8">
   <title>T3D Model Viewer</title>
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <link rel="shortcut icon" href="./favicon.ico" />
-  <link rel="stylesheet" href="./css/main.css">
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="/libs/handlebars.runtime.js"></script>
+  <script src="/hbs/report_template.precompiled.js"></script>
+  <script src="/hbs/report_toggle.precompiled.js"></script>
 </head>
 
 <body>
@@ -35,8 +38,8 @@
       </div>
     </div>
     <div class="spinner"></div>
-  <!-- <script src="./libs/t3d/build/t3d.js"></script> -->
-  <script src="./dist/main.js"></script>
+  </div>
+  <script type="module" src="/src/App.js"></script>
 </body>
 
 </html>
