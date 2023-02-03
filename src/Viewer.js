@@ -14,7 +14,7 @@ import { LensflareMarker } from '../node_modules/t3d-effect-composer/examples/js
 import { GroundShader } from './viewer/shader/GroundShader.js';
 import Nanobar from 'nanobar';
 
-DRACOLoader.setDecoderPath('/libs/draco/');
+DRACOLoader.setDecoderPath('./libs/draco/');
 
 export class Viewer {
 
@@ -118,8 +118,8 @@ export class Viewer {
 
 		const lensflareMarker = new LensflareMarker();
 		lensflareMarker.occlusionScale = 0.1;
-		const textureFlare0 = textureLoader.load("/textures/lensflare/lensflare0.png");
-		const textureFlare3 = textureLoader.load("/textures/lensflare/lensflare3.png");
+		const textureFlare0 = textureLoader.load("./textures/lensflare/lensflare0.png");
+		const textureFlare3 = textureLoader.load("./textures/lensflare/lensflare3.png");
 		lensflareMarker.lensflareElements = [
 			{ texture: textureFlare0, color: new Color3(0.2, 0.2, 0.2), scale: 0.6, offset: 0 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.05, offset: 0.6 },

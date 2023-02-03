@@ -19,7 +19,7 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 		this.sceneMSAA = true;
 
-		const uvCheckTexture = new Texture2DLoader().load('/textures/uv_checker.jpg');
+		const uvCheckTexture = new Texture2DLoader().load('./textures/uv_checker.jpg');
 		uvCheckTexture.anisotropy = 8;
 
 		this.getBuffer('SceneBuffer').setOutputEncoding(TEXEL_ENCODING_TYPE.GAMMA);

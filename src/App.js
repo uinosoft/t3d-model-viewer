@@ -39,15 +39,15 @@ export class App {
 		const _this = this;
 		model1.onclick = function() {
 			_this.showSpinner();
-			_this.view("/models/robotPBR/robot.gltf");
+			_this.view("./models/robotPBR/robot.gltf");
 		};
 		model2.onclick = function() {
 			_this.showSpinner();
-			_this.view("/models/UinoHelmet/glTF/UinoHelmet.gltf");
+			_this.view("./models/UinoHelmet/glTF/UinoHelmet.gltf");
 		};
 		model3.onclick = function() {
 			_this.showSpinner();
-			_this.view("/models/Room.glb");
+			_this.view("./models/Room.glb");
 		};
 	}
 
