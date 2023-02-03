@@ -429,7 +429,7 @@ export class Viewer {
 			this._scene.environment = tex;
 			this._skyBox.texture = tex;
 		} else {
-			this._rgbeLoader.loadAsync(`/textures/${name}.${ext}`).then(textureData => {
+			this._rgbeLoader.loadAsync(`./textures/${name}.${ext}`).then(textureData => {
 				let texture = new Texture2D();
 				texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
 				texture.type = textureData.type;
