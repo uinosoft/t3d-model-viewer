@@ -10,7 +10,7 @@ import { Clock } from 't3d/examples/jsm/Clock.js';
 import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
 import { default as environmentMap } from './environments.js';
 import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
-import { LensflareMarker } from '../node_modules/t3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
+import { LensflareMarker } from 't3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
 import { GroundShader } from './viewer/shader/GroundShader.js';
 import Nanobar from 'nanobar';
 

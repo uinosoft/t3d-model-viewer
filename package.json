@@ -12,11 +12,11 @@
   "dependencies": {
     "glob-to-regexp": "^0.4.1",
     "gltf-validator": "^2.0.0-dev.3.9",
-    "lil-gui": "^0.17.0",
+    "lil-gui": "^0.18.0",
     "nanobar": "^0.4.2",
     "simple-dropzone": "^0.8.1",
     "t3d": "^0.1.2",
-    "t3d-effect-composer": "^0.0.7"
+    "t3d-effect-composer": "^0.0.8-beta.0"
   },
   "scripts": {
     "dev": "vite",
