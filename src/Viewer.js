@@ -178,6 +178,8 @@ export class Viewer {
 		this.actionStates = null;
 		this.timeScale = 1;
 
+		this._content = null;
+
 		this._cameraClip = {
 			near: 1,
 			far: 1000
@@ -358,9 +360,17 @@ export class Viewer {
 
 					this._root = root;
 					this._scene.add(root);
+					this._content = root;
 					resolve(gltf);
+					this.printGraph(this._content);
 				});
 		});
+	}
+
+	printGraph(node) {
+		console.group(' <' + node.constructor.name + '> ' + node.name);// node.constructor.name replace node.type
+		node.children.forEach((child) => this.printGraph(child));
+		console.groupEnd();
 	}
 
 	setClips(clips) {
