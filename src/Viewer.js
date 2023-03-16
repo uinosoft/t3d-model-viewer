@@ -3,6 +3,7 @@ import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
 import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
 import { DRACOLoader } from 't3d/examples/jsm/loaders/DRACOLoader.js';
+import { KTX2Loader } from 't3d/examples/jsm/loaders/KTX2Loader.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
 import { RGBELoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
 import { PMREM } from 't3d/examples/jsm/PMREM.js';
@@ -13,6 +14,9 @@ import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEf
 import { LensflareMarker } from 't3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
 import { GroundShader } from './viewer/shader/GroundShader.js';
 import Nanobar from 'nanobar';
+import { MeshoptDecoder } from './libs/meshopt_decoder.module.js';
+import * as KTXParse from './libs/ktx-parse.module.js';
+import { ZSTDDecoder } from './libs/zstddec.module.js';
 
 DRACOLoader.setDecoderPath('./libs/draco/');
 
@@ -285,6 +289,15 @@ export class Viewer {
 			const loader = new GLTFLoader(manager);
 			loader.replaceParser(IndexParser, 0);
 			loader.setDRACOLoader(new DRACOLoader());
+
+			const zstdDecoder = new ZSTDDecoder().init();
+			KTX2Loader.setKTXParser(KTXParse).setZSTDDecoder(zstdDecoder);
+			const ktx2Loader = new KTX2Loader()
+				.setTranscoderPath('./libs/basis/')
+				.detectSupport(this._renderer);
+			loader.setKTX2Loader(ktx2Loader);
+			loader.setMeshoptDecoder(MeshoptDecoder);
+
 			const blobURLs = [];
 
 			loader.load(url)

@@ -28,7 +28,7 @@ jobs:
           node-version: 18
           cache: 'npm'
       - name: Install Packages
-        run: npm ci
+        run: npm ci -f
       - name: Build
         run: npm run build -- --base=/${{ github.event.repository.name }}/
       - name: Setup Pages
