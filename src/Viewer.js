@@ -1,4 +1,4 @@
-import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2, ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE, Box3, Sphere, DRAW_MODE, Spherical } from 't3d';
+import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Matrix4, Vector4, Vector3, Vector2, ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE, Box3, Sphere, DRAW_MODE, Spherical } from 't3d';
 import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
 import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
@@ -592,18 +592,97 @@ function setColor(color, hex) {
 
 function getBoundingBox(object, target) {
 	const childBox = new Box3();
+	const _v = new Vector3();
 
 	object.updateMatrix();
 
 	object.traverse(node => {
 		if (node.geometry) {
-			node.geometry.computeBoundingBox();
-			childBox.copy(node.geometry.boundingBox).applyMatrix4(node.worldMatrix);
-			target.expandByBox3(childBox);
+			if (node.isSkinnedMesh || node.morphTargetInfluences) {
+				geometryTransform(node, childBox, _v, target);
+			} else {
+				node.geometry.computeBoundingBox();
+				childBox.copy(node.geometry.boundingBox).applyMatrix4(node.worldMatrix);
+				target.expandByBox3(childBox);
+			}
 		}
 	});
 
 	return target;
+}
+
+function geometryTransform(node, childBox, pos, target) {
+	const index = node.geometry.index.buffer.array;
+	const position = node.geometry.getAttribute("a_Position");
+	childBox.makeEmpty();
+	for (let i = 0; i < index.length; i += 1) {
+		const a =  index[i];
+		pos.fromArray(position.buffer.array, a * 3);
+		if (node.morphTargetInfluences) {
+			morphTransform(node, a, pos);
+		}
+		if (node.isSkinnedMesh) {
+			boneTransform(node, a, pos);
+		}
+		childBox.expandByPoint(pos);
+	}
+	childBox.applyMatrix4(node.worldMatrix);
+	target.expandByBox3(childBox);
+	return target;
+}
+
+const _morph = new Vector3();
+const _temp = new Vector3();
+const _basePosition = new Vector3();
+const _skinIndex = new Vector4();
+const _skinWeight = new Vector4();
+const _vector = new Vector3();
+const _matrix = new Matrix4();
+
+function morphTransform(object, index, target) {
+	const morphPosition = object.geometry.morphAttributes.position;
+	const morphInfluences = object.morphTargetInfluences;
+	_morph.set(0, 0, 0);
+	for (let i = 0; i < morphPosition.length; i++) {
+		const influence = morphInfluences[i];
+		const morphAttribute = morphPosition[i];
+		if (influence === 0 || influence - 0 < Number.EPSILON) continue;
+		_temp.fromArray(morphAttribute.buffer.array, index * 3);
+		_morph.addScaledVector(_temp, influence);
+	}
+	target.add(_morph);
+	return target;
+}
+
+function boneTransform(object, index, target) {
+	const skeleton = object.skeleton;
+	const skinIndex = object.geometry.attributes['skinIndex'];
+	const skinWeight = object.geometry.attributes['skinWeight'];
+	_skinIndex.fromArray(skinIndex.buffer.array, index * skinIndex.size);
+	_skinWeight.fromArray(skinWeight.buffer.array, index * skinWeight.size);
+	_basePosition.copy(target).applyMatrix4(object.bindMatrix);
+	target.set(0, 0, 0);
+	for (let i = 0; i < 4; i++) {
+		const weight = getComponent(_skinWeight, i);
+		if (weight === 0 || weight - 0 < Number.EPSILON) continue;
+		const boneIndex = getComponent(_skinIndex, i);
+		if (skeleton.bones[boneIndex] && skeleton.boneInverses[boneIndex]) {
+			_matrix.multiplyMatrices(skeleton.bones[boneIndex].worldMatrix, skeleton.boneInverses[boneIndex]);
+			target.addScaledVector(_vector.copy(_basePosition).applyMatrix4(_matrix), weight);
+		}
+	}
+	target.applyMatrix4(object.bindMatrixInverse)
+	return target;
+}
+
+function getComponent(vec, index) {
+	switch (index) {
+		case 0: return vec.x;
+		case 1: return vec.y;
+		case 2: return vec.z;
+		case 3: return vec.w;
+		default: throw new Error('index is out of range: ' + index);
+	}
 }
 
 function setBoundingSphereByBox(box, target) {
