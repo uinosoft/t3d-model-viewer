@@ -1,4 +1,4 @@
-import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Matrix4, Vector4, Vector3, Vector2, ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE, Box3, Sphere, DRAW_MODE, Spherical } from 't3d';
+import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2, ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE, Box3, Sphere, DRAW_MODE, Spherical } from 't3d';
 import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
 import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
@@ -195,6 +195,8 @@ export class Viewer {
 		this._animationFrame = null;
 		this._running = false;
 
+		this._updatedBoundingBoxByAction = false;
+
 		window.addEventListener("resize", () => {
 			this.resize();
 		}, true);
@@ -205,6 +207,7 @@ export class Viewer {
 			if (this._running) {
 				this._animationFrame = requestAnimationFrame(loop);
 				this.tick(timeStamp);
+				this.updateBoundingBox();
 			}
 		};
 
@@ -235,6 +238,22 @@ export class Viewer {
 		this._directionalLightCamera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
 		this._effectComposer.render(this._renderer, this._scene, this._camera, this._backRenderTarget);
+	}
+
+	updateBoundingBox() {
+		if (this._updatedBoundingBoxByAction) return;
+		// The boundingBox is updated only when the animation is playing
+		if (this._root && this.actions) {
+			for (let i = 0; i < this.actions.length; i++) {
+				if (this.actionStates[this.actions[i].clip.name]) {
+					getBoundingBox(this._root, this._boundingBox);
+					setBoundingSphereByBox(this._boundingBox, this._boundingSphere);
+					this.setCameraState();
+					this._updatedBoundingBoxByAction = true;
+					break;
+				}
+			}
+		}
 	}
 
 	resize() {
@@ -319,43 +338,23 @@ export class Viewer {
 								node.effects = { 'Glow': 1 }
 							}
 						}
+
+						if (!_rootBones.includes(node) && node.isBone && !node.parent.isBone) {
+							_rootBones.push(node);
+						}
 					});
 
 					gltf.animations && this.setClips(gltf.animations);
 
 					getBoundingBox(root, this._boundingBox);
 					setBoundingSphereByBox(this._boundingBox, this._boundingSphere);
-
 					const center = this._boundingSphere.center;
-					this._diagonal.subVectors(this._boundingBox.max, this._boundingBox.min);
-					const diameter = this._diagonal.getLength();
-					this._diameter = diameter;
-
 					root.position.x += (root.position.x - center.x);
 					root.position.y += (root.position.y - center.y);
 					root.position.z += (root.position.z - center.z);
+					getBoundingBox(root, this._boundingBox);// For models without animation
 
-					this._cameraControl.reset();
-					this._cameraControl.maxDistance = diameter * 10;
-
-					const { clientWidth, clientHeight } = this._canvas;
-					const cameraNear = diameter / 100, cameraFar = diameter * 100;
-					const aspect = clientHeight / clientWidth;
-					if (this._cameraDefault === 'perspective') {
-						this._camera.setPerspective(this._fov / 180 * Math.PI, clientWidth / clientHeight, cameraNear, cameraFar);
-						this._camera.add(this._skyBox);
-					} else {
-						this._camera.setOrtho(-this._diameter * 2, this._diameter * 2, -this._diameter * 2 * aspect, this._diameter * 2 * aspect, -cameraFar, cameraFar);
-						this._camera.remove(this._skyBox);
-					}
-					this._camera.position.copy(center);
-					this._camera.position.x += diameter / 1.5;
-					this._camera.position.y += diameter / 5.0;
-					this._camera.position.z += diameter / 1.5;
-					this._cameraClip.near = cameraNear;
-					this._cameraClip.far = cameraFar;
-
-					this._cameraControl.saveState();
+					this.setCameraState(root);
 
 					this._ground.position.y = -Math.abs(this._diagonal.y / 2);
 					const groundSize = Math.max(30, Math.abs(Math.max(this._diagonal.x, this._diagonal.z) * 2));
@@ -403,6 +402,8 @@ export class Viewer {
 		});
 	}
 	stopAllClips() {
+		if (!this.actions) return;
+
 		this.actions.forEach(actions => {
 			if (this.actionStates[actions.clip.name]) {
 				actions.time = 0;
@@ -541,6 +542,35 @@ export class Viewer {
 		}
 	}
 
+	setCameraState() {
+		const center = this._boundingSphere.center;
+		this._diagonal.subVectors(this._boundingBox.max, this._boundingBox.min);
+		const diameter = this._diagonal.getLength();
+		this._diameter = diameter;
+
+		this._cameraControl.reset();
+		this._cameraControl.maxDistance = diameter * 10;
+
+		const { clientWidth, clientHeight } = this._canvas;
+		const cameraNear = diameter / 100, cameraFar = diameter * 100;
+		const aspect = clientHeight / clientWidth;
+		if (this._cameraDefault === 'perspective') {
+			this._camera.setPerspective(this._fov / 180 * Math.PI, clientWidth / clientHeight, cameraNear, cameraFar);
+			this._camera.add(this._skyBox);
+		} else {
+			this._camera.setOrtho(-this._diameter * 2, this._diameter * 2, -this._diameter * 2 * aspect, this._diameter * 2 * aspect, -cameraFar, cameraFar);
+			this._camera.remove(this._skyBox);
+		}
+		this._camera.position.copy(center);
+		this._camera.position.x += diameter;
+		this._camera.position.y += diameter / 2.5;
+		this._camera.position.z += diameter;
+		this._cameraClip.near = cameraNear;
+		this._cameraClip.far = cameraFar;
+
+		this._cameraControl.saveState();
+	}
+
 	setShadow(options, light) {
 		if (light == 1) {
 			this._directionalLight.castShadow = options.shadowenable;
@@ -558,6 +588,12 @@ export class Viewer {
 
 	clear() {
 		if (!this._root) return;
+
+		_rootBones = [];
+		this._updatedBoundingBoxByAction = false;
+
+		this.stopAllClips();
+		this.actions = [];
 
 		this._scene.remove(this._root);
 
@@ -590,99 +626,42 @@ function setColor(color, hex) {
 	color.b = parseInt(hex.charAt(5) + hex.charAt(6), 16) / 255;
 }
 
-function getBoundingBox(object, target) {
-	const childBox = new Box3();
-	const _v = new Vector3();
+let _rootBones = [];
+const _childBox = new Box3();
+const _pos = new Vector3();
 
+function getBoundingBox(object, target) {
+	_pos.set(0, 0, 0);
+	_childBox.makeEmpty();
+	target.makeEmpty();
 	object.updateMatrix();
 
 	object.traverse(node => {
 		if (node.geometry) {
-			if (node.isSkinnedMesh || node.morphTargetInfluences) {
-				geometryTransform(node, childBox, _v, target);
+			if (node.isSkinnedMesh) {
+				node.geometry.computeBoundingBox();
+				_childBox.copy(node.geometry.boundingBox);
+				_rootBones.forEach(rootbone => {
+					const rootIndex = node.skeleton.bones.indexOf(rootbone);
+					if (rootIndex !== -1) {
+						_childBox.applyMatrix4(node.skeleton.boneInverses[rootIndex]);
+						_childBox.applyMatrix4(rootbone.worldMatrix);
+						target.expandByBox3(_childBox);
+					}
+				})
+			} else if (node.morphTargetInfluences) {
+				morphTransform(node, _childBox, _pos);
+				_childBox.applyMatrix4(node.worldMatrix);
+				target.expandByBox3(_childBox);
 			} else {
 				node.geometry.computeBoundingBox();
-				childBox.copy(node.geometry.boundingBox).applyMatrix4(node.worldMatrix);
-				target.expandByBox3(childBox);
+				_childBox.copy(node.geometry.boundingBox).applyMatrix4(node.worldMatrix);
+				target.expandByBox3(_childBox);
 			}
 		}
 	});
 
 	return target;
-}
-
-function geometryTransform(node, childBox, pos, target) {
-	const index = node.geometry.index.buffer.array;
-	const position = node.geometry.getAttribute("a_Position");
-	childBox.makeEmpty();
-	for (let i = 0; i < index.length; i += 1) {
-		const a =  index[i];
-		pos.fromArray(position.buffer.array, a * 3);
-		if (node.morphTargetInfluences) {
-			morphTransform(node, a, pos);
-		}
-		if (node.isSkinnedMesh) {
-			boneTransform(node, a, pos);
-		}
-		childBox.expandByPoint(pos);
-	}
-	childBox.applyMatrix4(node.worldMatrix);
-	target.expandByBox3(childBox);
-	return target;
-}
-
-const _morph = new Vector3();
-const _temp = new Vector3();
-const _basePosition = new Vector3();
-const _skinIndex = new Vector4();
-const _skinWeight = new Vector4();
-const _vector = new Vector3();
-const _matrix = new Matrix4();
-
-function morphTransform(object, index, target) {
-	const morphPosition = object.geometry.morphAttributes.position;
-	const morphInfluences = object.morphTargetInfluences;
-	_morph.set(0, 0, 0);
-	for (let i = 0; i < morphPosition.length; i++) {
-		const influence = morphInfluences[i];
-		const morphAttribute = morphPosition[i];
-		if (influence === 0 || influence - 0 < Number.EPSILON) continue;
-		_temp.fromArray(morphAttribute.buffer.array, index * 3);
-		_morph.addScaledVector(_temp, influence);
-	}
-	target.add(_morph);
-	return target;
-}
-
-function boneTransform(object, index, target) {
-	const skeleton = object.skeleton;
-	const skinIndex = object.geometry.attributes['skinIndex'];
-	const skinWeight = object.geometry.attributes['skinWeight'];
-	_skinIndex.fromArray(skinIndex.buffer.array, index * skinIndex.size);
-	_skinWeight.fromArray(skinWeight.buffer.array, index * skinWeight.size);
-	_basePosition.copy(target).applyMatrix4(object.bindMatrix);
-	target.set(0, 0, 0);
-	for (let i = 0; i < 4; i++) {
-		const weight = getComponent(_skinWeight, i);
-		if (weight === 0 || weight - 0 < Number.EPSILON) continue;
-		const boneIndex = getComponent(_skinIndex, i);
-		if (skeleton.bones[boneIndex] && skeleton.boneInverses[boneIndex]) {
-			_matrix.multiplyMatrices(skeleton.bones[boneIndex].worldMatrix, skeleton.boneInverses[boneIndex]);
-			target.addScaledVector(_vector.copy(_basePosition).applyMatrix4(_matrix), weight);
-		}
-	}
-	target.applyMatrix4(object.bindMatrixInverse)
-	return target;
-}
-
-function getComponent(vec, index) {
-	switch (index) {
-		case 0: return vec.x;
-		case 1: return vec.y;
-		case 2: return vec.z;
-		case 3: return vec.w;
-		default: throw new Error('index is out of range: ' + index);
-	}
 }
 
 function setBoundingSphereByBox(box, target) {
@@ -707,6 +686,40 @@ function updateLightDirection(light, coord, radius) {
 	light.shadow.windowSize = radius * 10;
 	light.shadow.cameraNear = radius / 50;
 	light.shadow.cameraFar = radius * 5;
+}
+
+// morphTransform
+// if (node.morphTargetInfluences)
+const _morph = new Vector3();
+const _temp = new Vector3();
+
+function morphTransform(node, childBox, pos) {
+	const index = node.geometry.index.buffer.array;
+	const position = node.geometry.getAttribute("a_Position");
+	childBox.makeEmpty();
+	for (let i = 0; i < index.length; i += 1) {
+		const a =  index[i];
+		pos.fromArray(position.buffer.array, a * 3);
+		morphNodeTransform(node, a, pos);
+		childBox.expandByPoint(pos);
+	}
+	return childBox;
+}
+
+function morphNodeTransform(object, index, target) {
+	const morphPosition = object.geometry.morphAttributes.position;
+	const morphInfluences = object.morphTargetInfluences;
+	_morph.set(0, 0, 0);
+	_temp.set(0, 0, 0);
+	for (let i = 0; i < morphPosition.length; i++) {
+		const influence = morphInfluences[i];
+		const morphAttribute = morphPosition[i];
+		if (influence === 0 || influence - 0 < Number.EPSILON) continue;
+		_temp.fromArray(morphAttribute.buffer.array, index * 3);
+		_morph.addScaledVector(_temp, influence);
+	}
+	target.add(_morph);
+	return target;
 }
 
 export class IndexParser {
