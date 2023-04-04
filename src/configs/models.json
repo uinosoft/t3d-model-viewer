@@ -1,0 +1,7 @@
+{
+    "array": [
+        { "name": "dog", "uri": "robotPBR/robot.gltf" },
+        { "name": "helmet", "uri": "UinoHelmet/glTF/UinoHelmet.gltf" },
+        { "name": "room", "uri": "Room.glb" }
+    ]
+}

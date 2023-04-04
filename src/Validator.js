@@ -1,10 +1,11 @@
 import { validateBytes } from 'gltf-validator';
 import glob from 'glob-to-regexp';
-import registry from './gltf-generator-registry.json';
+import registry from './configs/gltf-generator-registry.json';
+import { extractUrlBase } from './Utils.js';
 
 const SEVERITY_MAP = ['Errors', 'Warnings', 'Infos', 'Hints'];
 
-export class ValidationController {
+export class Validator {
 
 	constructor(el) {
 		this.el = el;
@@ -18,16 +19,16 @@ export class ValidationController {
 		this.reportTpl = Handlebars.templates.report_template;
 	}
 
-	validate(data, fileURL, rootPath, fileMap, viewer, response) {
+	validate(data, fileURL, rootPath, fileMap, response) {
 		validateBytes(new Uint8Array(data), {
 			externalResourceFunction: (uri) =>
-				this.resolveExternalResource(uri, fileURL, rootPath, fileMap, viewer) })
+				this.resolveExternalResource(uri, fileURL, rootPath, fileMap) })
 			.then((report) => this.setReport(report, response))
 			.catch((e) => this.setReportException(e));
 	}
 
-	resolveExternalResource(uri, rootFile, rootPath, assetMap, viewer) {
-		const baseURL = viewer.extractUrlBase(rootFile);
+	resolveExternalResource(uri, rootFile, rootPath, assetMap) {
+		const baseURL = extractUrlBase(rootFile);
 		const normalizedURL =
 			rootPath +
 			decodeURI(uri) // validator applies URI encoding.

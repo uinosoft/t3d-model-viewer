@@ -9,7 +9,7 @@ import { RGBELoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
 import { PMREM } from 't3d/examples/jsm/PMREM.js';
 import { Clock } from 't3d/examples/jsm/Clock.js';
 import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
-import { default as environmentMap } from './environments.js';
+import environmentMap from './configs/environments.json';
 import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
 import { LensflareMarker } from 't3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
 import { GroundShader } from './viewer/shader/GroundShader.js';
