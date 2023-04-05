@@ -114,21 +114,24 @@ export class UIControl {
 
 		const ssaoEffectFolder = effectFolder.addFolder('SSAO');
 		ssaoEffectFolder.add(options.postEffect.ssao, 'active');
-		ssaoEffectFolder.add(options.postEffect.ssao, 'radius', 0, 5, 0.01);
-		ssaoEffectFolder.add(options.postEffect.ssao, 'power', 0, 5, 1);
+		ssaoEffectFolder.add(options.postEffect.ssao, 'radius', 0, 50, 0.01);
+		ssaoEffectFolder.add(options.postEffect.ssao, 'power', 0, 5, 0.1);
 		ssaoEffectFolder.add(options.postEffect.ssao, 'bias', 0, 1, 0.0001);
-		ssaoEffectFolder.add(options.postEffect.ssao, 'intensity', 0, 2, 0.1);
+		ssaoEffectFolder.add(options.postEffect.ssao, 'intensity', 0, 2, 0.01);
 		ssaoEffectFolder.add(options.postEffect.ssao, 'quality', ['Low', 'Medium', 'High', 'Ultra']);
+		ssaoEffectFolder.add(options.postEffect.ssao, 'autoSampleWeight');
 
 		const ssrEffectFolder = effectFolder.addFolder('SSR');
 		ssrEffectFolder.add(options.postEffect.ssr, 'active');
-		ssrEffectFolder.add(options.postEffect.ssr, 'maxRayDistance', 1, 1000, 1);
 		ssrEffectFolder.add(options.postEffect.ssr, 'pixelStride', 1, 100, 1);
-		ssrEffectFolder.add(options.postEffect.ssr, 'pixelStrideZCutoff', 1, 300, 1);
-		ssrEffectFolder.add(options.postEffect.ssr, 'screenEdgeFadeStart', 0, 1, 0.01);
-		ssrEffectFolder.add(options.postEffect.ssr, 'eyeFadeStart', 0, 1, 0.01);
-		ssrEffectFolder.add(options.postEffect.ssr, 'eyeFadeEnd', 0, 1, 0.01);
+		ssrEffectFolder.add(options.postEffect.ssr, 'maxIteration', 1, 20, 1);
+		ssrEffectFolder.add(options.postEffect.ssr, 'maxSteps', 1, 500, 1);
+		ssrEffectFolder.add(options.postEffect.ssr, 'maxRayDistance', 1, 2000, 0.01);
+		ssrEffectFolder.add(options.postEffect.ssr, 'enablePixelStrideZCutoff');
+		ssrEffectFolder.add(options.postEffect.ssr, 'pixelStrideZCutoff', 1, 300, 0.01);
 		ssrEffectFolder.add(options.postEffect.ssr, 'minGlossiness', 0, 1, 0.01);
+		ssrEffectFolder.add(options.postEffect.ssr, 'strength', 0, 1.5, 0.01);
+		ssrEffectFolder.add(options.postEffect.ssr, 'mixType', [0, 1]);
 
 		const dofEffectFolder = effectFolder.addFolder('DOF');
 		dofEffectFolder.add(options.postEffect.dof, 'active');
@@ -304,15 +307,18 @@ export class UIControl {
 			gui.children[5].children[3].children[3].setValue(options.postEffect.ssao.bias);
 			gui.children[5].children[3].children[4].setValue(options.postEffect.ssao.intensity);
 			gui.children[5].children[3].children[5].setValue(options.postEffect.ssao.quality);
+			gui.children[5].children[3].children[6].setValue(options.postEffect.ssao.autoSampleWeight);
 
 			gui.children[5].children[4].children[0].setValue(options.postEffect.ssr.active);
-			gui.children[5].children[4].children[1].setValue(options.postEffect.ssr.maxRayDistance);
-			gui.children[5].children[4].children[2].setValue(options.postEffect.ssr.pixelStride);
-			gui.children[5].children[4].children[3].setValue(options.postEffect.ssr.pixelStrideZCutoff);
-			gui.children[5].children[4].children[4].setValue(options.postEffect.ssr.screenEdgeFadeStart);
-			gui.children[5].children[4].children[5].setValue(options.postEffect.ssr.eyeFadeStart);
-			gui.children[5].children[4].children[6].setValue(options.postEffect.ssr.eyeFadeEnd);
+			gui.children[5].children[4].children[1].setValue(options.postEffect.ssr.pixelStride);
+			gui.children[5].children[4].children[2].setValue(options.postEffect.ssr.maxIteration);
+			gui.children[5].children[4].children[3].setValue(options.postEffect.ssr.maxSteps);
+			gui.children[5].children[4].children[4].setValue(options.postEffect.ssr.maxRayDistance);
+			gui.children[5].children[4].children[5].setValue(options.postEffect.ssr.enablePixelStrideZCutoff);
+			gui.children[5].children[4].children[6].setValue(options.postEffect.ssr.pixelStrideZCutoff);
 			gui.children[5].children[4].children[7].setValue(options.postEffect.ssr.minGlossiness);
+			gui.children[5].children[4].children[8].setValue(options.postEffect.ssr.strength);
+			gui.children[5].children[4].children[9].setValue(options.postEffect.ssr.mixType);
 
 			gui.children[5].children[5].children[0].setValue(options.postEffect.dof.active);
 			gui.children[5].children[5].children[1].setValue(options.postEffect.dof.focalDepth);

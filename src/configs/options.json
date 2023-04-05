@@ -1,5 +1,5 @@
 {
-    "version": "0.0.1",
+    "version": "0.0.2",
     "global": {
         "wireframe": false
     },
@@ -84,17 +84,20 @@
             "power": 1, 
             "bias": 0.1, 
             "intensity": 1, 
-            "quality": "Medium"
+            "quality": "Medium",
+            "autoSampleWeight": true
         }, 
         "ssr": {
-            "active": false, 
-            "maxRayDistance": 4, 
-            "pixelStride": 16, 
-            "pixelStrideZCutoff": 10, 
-            "screenEdgeFadeStart": 0.9, 
-            "eyeFadeStart": 0.4, 
-            "eyeFadeEnd": 0.8, 
-            "minGlossiness": 0.2
+            "active": false,
+            "pixelStride": 8,
+            "maxIteration": 5,
+            "maxSteps": 50,
+            "maxRayDistance": 500,
+            "enablePixelStrideZCutoff": true,
+            "pixelStrideZCutoff": 50,
+            "minGlossiness": 0.2,
+            "strength": 0.2,
+            "mixType": 0
         }, 
         "dof": {
             "active": false, 
@@ -116,7 +119,7 @@
         }, 
         "vignetting": {
             "active": false, 
-            "color": "#ffffff", 
+            "color": "#000000", 
             "offset": 1
         }, 
         "bluredge": {
