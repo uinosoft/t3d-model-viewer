@@ -18,8 +18,6 @@ import { MeshoptDecoder } from './libs/meshopt_decoder.module.js';
 import * as KTXParse from './libs/ktx-parse.module.js';
 import { ZSTDDecoder } from './libs/zstddec.module.js';
 
-DRACOLoader.setDecoderPath('./libs/draco/');
-
 export class Viewer {
 
 	constructor(el) {
@@ -305,9 +303,12 @@ export class Viewer {
 				return (path || '') + url;
 			});
 
+			const dracoLoader = new DRACOLoader();
+			dracoLoader.setDecoderPath('./libs/draco/');
+
 			const loader = new GLTFLoader(manager);
 			loader.replaceParser(IndexParser, 0);
-			loader.setDRACOLoader(new DRACOLoader());
+			loader.setDRACOLoader(dracoLoader);
 
 			const zstdDecoder = new ZSTDDecoder().init();
 			KTX2Loader.setKTXParser(KTXParse).setZSTDDecoder(zstdDecoder);
