@@ -332,7 +332,8 @@ export class Viewer {
 						node.receiveShadow = true;
 
 						if (node.material) {
-							node.material.drawMode = this._wireframe ? DRAW_MODE.LINES : DRAW_MODE.TRIANGLES;
+							node.material.__drawMode = node.material.drawMode;
+							node.material.drawMode = this._wireframe ? DRAW_MODE.LINES : node.material.__drawMode;
 							node.material.wireframe = this._wireframe || false;
 							const emissive = node.material.emissive;
 							if (emissive.r + emissive.g + emissive.b > 0.0) {
@@ -421,7 +422,8 @@ export class Viewer {
 
 		this._root.traverse(node => {
 			if (node.material) {
-				node.material.drawMode = this._wireframe ? DRAW_MODE.LINES : DRAW_MODE.TRIANGLES;
+				const originDrawMode = node.material.__drawMode || DRAW_MODE.TRIANGLES;
+				node.material.drawMode = this._wireframe ? DRAW_MODE.LINES : originDrawMode;
 				node.material.wireframe = this._wireframe;
 			}
 		});
