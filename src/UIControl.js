@@ -202,10 +202,12 @@ export class UIControl {
 		const fileControls = {
 			import: () => {
 				importFileJSON(_options => {
+					viewer.updateCameraView(_options.cameraView);
 					this.updateOptions(upgradeJson(_options));
 				});
 			},
 			export: () => {
+				viewer.exportCameraView(options);
 				exportFileJSON(options);
 			}
 		}

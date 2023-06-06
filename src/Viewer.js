@@ -18,6 +18,8 @@ import { MeshoptDecoder } from './libs/meshopt_decoder.module.js';
 import * as KTXParse from './libs/ktx-parse.module.js';
 import { ZSTDDecoder } from './libs/zstddec.module.js';
 
+import { default as TWEEN } from '@tweenjs/tween.js';
+
 export class Viewer {
 
 	constructor(el) {
@@ -59,7 +61,6 @@ export class Viewer {
 		const fov = 45;
 
 		const camera = new Camera();
-		camera.position.set(8, 3, 8);
 		camera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 		camera.setPerspective(fov / 180 * Math.PI, width / height, 1, 1000);
 		scene.add(camera);
@@ -195,6 +196,12 @@ export class Viewer {
 
 		this._updatedBoundingBoxByAction = false;
 
+		this._cameraDefaultView = {
+			start: [60, 10, 8],
+			to: [80, 45, 2.6]
+		}
+		this._cameraTween = null;
+
 		window.addEventListener("resize", () => {
 			this.resize();
 		}, true);
@@ -223,6 +230,8 @@ export class Viewer {
 	}
 
 	tick(timeStamp) {
+		TWEEN.update();
+
 		this._cameraControl.update();
 
 		this._scene.updateMatrix();
@@ -356,7 +365,7 @@ export class Viewer {
 					root.position.z += (root.position.z - center.z);
 					getBoundingBox(root, this._boundingBox);// For models without animation
 
-					this.setCameraState(root);
+					this.setCameraState(true);
 
 					this._ground.position.y = -Math.abs(this._diagonal.y / 2);
 					const groundSize = Math.max(30, Math.abs(Math.max(this._diagonal.x, this._diagonal.z) * 2));
@@ -545,11 +554,12 @@ export class Viewer {
 		}
 	}
 
-	setCameraState() {
-		const center = this._boundingSphere.center;
+	setCameraState(resetStart) {
 		this._diagonal.subVectors(this._boundingBox.max, this._boundingBox.min);
 		const diameter = this._diagonal.getLength();
 		this._diameter = diameter;
+
+		const oldStart = this._camera.position.clone();
 
 		this._cameraControl.reset();
 		this._cameraControl.maxDistance = diameter * 10;
@@ -561,17 +571,72 @@ export class Viewer {
 			this._camera.setPerspective(this._fov / 180 * Math.PI, clientWidth / clientHeight, cameraNear, cameraFar);
 			this._camera.add(this._skyBox);
 		} else {
-			this._camera.setOrtho(-this._diameter * 2, this._diameter * 2, -this._diameter * 2 * aspect, this._diameter * 2 * aspect, -cameraFar, cameraFar);
+			this._camera.setOrtho(-diameter * 2, diameter * 2, -diameter * 2 * aspect, diameter * 2 * aspect, -cameraFar, cameraFar);
 			this._camera.remove(this._skyBox);
 		}
-		this._camera.position.copy(center);
-		this._camera.position.x += diameter;
-		this._camera.position.y += diameter / 2.5;
-		this._camera.position.z += diameter;
+
+		const cameraDefaultView = this._cameraDefaultView;
+		const spherical = new Spherical();
+
+		if (resetStart) {
+			spherical.radius = this._boundingSphere.radius * cameraDefaultView.start[2];
+			spherical.phi = cameraDefaultView.start[0] * Math.PI / 180;
+			spherical.theta = cameraDefaultView.start[1] * Math.PI / 180;
+			this._camera.position.setFromSpherical(spherical);
+		} else {
+			this._camera.position.copy(oldStart);
+		}
+
+		spherical.radius = this._boundingSphere.radius * cameraDefaultView.to[2];
+		spherical.phi = cameraDefaultView.to[0] * Math.PI / 180;
+		spherical.theta = cameraDefaultView.to[1] * Math.PI / 180;
+		this.runCameraAnimation(new Vector3().setFromSpherical(spherical));
+
 		this._cameraClip.near = cameraNear;
 		this._cameraClip.far = cameraFar;
 
 		this._cameraControl.saveState();
+	}
+
+	runCameraAnimation(toPos) {
+		if (this._cameraTween) {
+			this._cameraTween.stop();
+			this._cameraTween = null;
+		}
+
+		this._cameraTween = new TWEEN.Tween(this._camera.position)
+			.to(toPos, 800)
+			.easing(TWEEN.Easing.Quartic.InOut)
+			.delay(200)
+			.start()
+			.onComplete(() => {
+				this._cameraTween.stop();
+				this._cameraTween = null;
+			})
+			.onStop(() => {
+				this._cameraTween.stop();
+				this._cameraTween = null;
+			});
+	}
+
+	updateCameraView(options) {
+		if (!options) return;
+
+		if (options.camera) {
+			this.runCameraAnimation(new Vector3().fromArray(options.camera));
+		}
+
+		if (options.target) {
+			this._cameraControl.target =  new Vector3().fromArray(options.target);
+		}
+	}
+
+	exportCameraView(options) {
+		const cameraPos = this._camera.position;
+		const cameraTarget = this._cameraControl.target;
+		if (!options.cameraView) options.cameraView = {};
+		options.cameraView.camera = [cameraPos.x, cameraPos.y, cameraPos.z];
+		options.cameraView.target = [cameraTarget.x, cameraTarget.y, cameraTarget.z];
 	}
 
 	setShadow(options, light) {
