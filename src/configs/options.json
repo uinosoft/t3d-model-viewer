@@ -1,5 +1,5 @@
 {
-    "version": "0.0.2",
+    "version": "0.0.3",
     "global": {
         "wireframe": false
     },
@@ -100,15 +100,15 @@
             "mixType": 0
         }, 
         "dof": {
-            "active": false, 
-            "focalDepth": 1, 
+            "active": false,
             "focalLength": 24, 
             "fstop": 0.9, 
             "maxblur": 1, 
             "threshold": 0.9, 
             "gain": 1, 
             "bias": 0.5, 
-            "dithering": 0.0001
+            "dithering": 0.0001,
+            "focalTarget": [0, 0, 0]
         }, 
         "fxaa": {
             "active": false
@@ -138,7 +138,8 @@
         }
     },
     "debuggers": {
-        "type": "None"
+        "type": "None",
+        "showPickFocus": false
     },
     "animation": {
         "timeScale": 1

@@ -149,6 +149,11 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		}
 	}
 
+	updateDOFFocalDepth(focalDepth) {
+		const dofEffect = this.getEffect('DOF');
+		dofEffect.focalDepth = focalDepth;
+	}
+
 }
 
 const materialMap = new Map();

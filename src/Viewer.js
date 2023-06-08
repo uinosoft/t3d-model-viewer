@@ -1,4 +1,6 @@
-import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2, ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE, Box3, Sphere, DRAW_MODE, Spherical } from 't3d';
+import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
+	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE,
+	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
 import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
 import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
@@ -17,6 +19,7 @@ import Nanobar from 'nanobar';
 import { MeshoptDecoder } from './libs/meshopt_decoder.module.js';
 import * as KTXParse from './libs/ktx-parse.module.js';
 import { ZSTDDecoder } from './libs/zstddec.module.js';
+import { Raycaster } from 't3d/examples/jsm/Raycaster.js';
 
 import { default as TWEEN } from '@tweenjs/tween.js';
 
@@ -86,6 +89,11 @@ export class Viewer {
 		groundMaterial.polygonOffsetFactor = 1;
 		groundMaterial.polygonOffsetUnits = 1;
 		scene.add(ground);
+
+		const focalTarget = new Mesh(new SphereGeometry(0.02, 20, 20), new PBRMaterial());
+		focalTarget.material.diffuse.setHex(0xff0000);
+		focalTarget.visible = false;
+		scene.add(focalTarget);
 
 		const cameraControl = new OrbitControls(camera, canvas);
 
@@ -202,6 +210,9 @@ export class Viewer {
 		}
 		this._cameraTween = null;
 
+		this._raycaster = new Raycaster();
+		this._focalTarget = focalTarget;
+
 		window.addEventListener("resize", () => {
 			this.resize();
 		}, true);
@@ -243,6 +254,9 @@ export class Viewer {
 
 		this._directionalLightCamera.position.set(this._camera.position.x, this._camera.position.y, this._camera.position.z);
 		this._directionalLightCamera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+
+		const focalTargetViewPos = _vec3_1.copy(this._focalTarget.position).applyMatrix4(this._camera.viewMatrix);
+		this._effectComposer.updateDOFFocalDepth(-focalTargetViewPos.z);
 
 		this._effectComposer.render(this._renderer, this._scene, this._camera, this._backRenderTarget);
 	}
@@ -529,6 +543,7 @@ export class Viewer {
 
 	setDebugger(options) {
 		this._effectComposer.setDebugger(options);
+		this._focalTarget.visible = options.showPickFocus;
 	}
 
 	setCamera(options) {
@@ -654,6 +669,23 @@ export class Viewer {
 		}
 	}
 
+	pickModel(event) {
+		if (!this._root) return null;
+
+		_vec2_1.x = (event.offsetX / this._canvas.width) * 2 - 1;
+		_vec2_1.y = -(event.offsetY / this._canvas.height) * 2 + 1;
+
+		this._raycaster.setFromCamera(_vec2_1, this._camera);
+		const intersects = this._raycaster.intersectObject(this._root, true);
+		const intersect = intersects.find(el => el.object.userData.pickable !== false);
+
+		return intersect;
+	}
+
+	updateFocalTarget(target) {
+		this._focalTarget.position.fromArray(target);
+	}
+
 	clear() {
 		if (!this._root) return;
 
@@ -681,6 +713,9 @@ export class Viewer {
 	}
 
 }
+
+const _vec2_1 = new Vector2();
+const _vec3_1 = new Vector3();
 
 function printGraph(node) {
 	console.group(' <' + node.constructor.name + '> ' + node.name);

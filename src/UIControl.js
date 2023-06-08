@@ -135,7 +135,6 @@ export class UIControl {
 
 		const dofEffectFolder = effectFolder.addFolder('DOF');
 		dofEffectFolder.add(options.postEffect.dof, 'active');
-		dofEffectFolder.add(options.postEffect.dof, 'focalDepth', 0, 100, 0.1);
 		dofEffectFolder.add(options.postEffect.dof, 'focalLength', 0, 100, 0.1);
 		dofEffectFolder.add(options.postEffect.dof, 'fstop', 0, 1, 0.1);
 		dofEffectFolder.add(options.postEffect.dof, 'maxblur', 0, 1, 0.1);
@@ -177,11 +176,31 @@ export class UIControl {
 		const lensflareEffectFolder = effectFolder.addFolder('Lensflare');
 		lensflareEffectFolder.add(options.postEffect.lensflare, 'active');
 
+		// DOFEffect
+
+		const dofEffectControls = {
+			pickFocus: () => {
+				const body = document.querySelector("body");
+				body.style.cursor = "crosshair";
+				viewer._canvas.onmousedown = function(event) {
+					const intersect = viewer.pickModel(event);
+					if (intersect) {
+						intersect.point.toArray(options.postEffect.dof.focalTarget);
+						viewer.updateFocalTarget(options.postEffect.dof.focalTarget);
+					}
+					body.style.cursor = "default";
+					viewer._canvas.onmousedown = null;
+				}
+			}
+		};
+		dofEffectFolder.add(dofEffectControls, 'pickFocus');
+
 		// Debugger
 
 		const debuggerFolder = gui.addFolder('Debugger').onChange(() => {
 			viewer.setDebugger(options.debuggers);
 		});
+		debuggerFolder.add(options.debuggers, 'showPickFocus');
 		debuggerFolder.add(options.debuggers, 'type', ['None', 'Normal', 'Depth', 'Position', 'SSAO', 'SSR', 'UV', 'Lensflare']);
 
 		// Animation
@@ -202,8 +221,14 @@ export class UIControl {
 		const fileControls = {
 			import: () => {
 				importFileJSON(_options => {
+					_options = upgradeJson(_options);
+
+					options.postEffect.dof.focalTarget = _options.postEffect.dof.focalTarget;
+					viewer.updateFocalTarget(_options.postEffect.dof.focalTarget);
+
 					viewer.updateCameraView(_options.cameraView);
-					this.updateOptions(upgradeJson(_options));
+
+					this.updateOptions(_options);
 				});
 			},
 			export: () => {
@@ -323,14 +348,13 @@ export class UIControl {
 			gui.children[5].children[4].children[9].setValue(options.postEffect.ssr.mixType);
 
 			gui.children[5].children[5].children[0].setValue(options.postEffect.dof.active);
-			gui.children[5].children[5].children[1].setValue(options.postEffect.dof.focalDepth);
-			gui.children[5].children[5].children[2].setValue(options.postEffect.dof.focalLength);
-			gui.children[5].children[5].children[3].setValue(options.postEffect.dof.fstop);
-			gui.children[5].children[5].children[4].setValue(options.postEffect.dof.maxblur);
-			gui.children[5].children[5].children[5].setValue(options.postEffect.dof.threshold);
-			gui.children[5].children[5].children[6].setValue(options.postEffect.dof.gain);
-			gui.children[5].children[5].children[7].setValue(options.postEffect.dof.bias);
-			gui.children[5].children[5].children[8].setValue(options.postEffect.dof.dithering);
+			gui.children[5].children[5].children[1].setValue(options.postEffect.dof.focalLength);
+			gui.children[5].children[5].children[2].setValue(options.postEffect.dof.fstop);
+			gui.children[5].children[5].children[3].setValue(options.postEffect.dof.maxblur);
+			gui.children[5].children[5].children[4].setValue(options.postEffect.dof.threshold);
+			gui.children[5].children[5].children[5].setValue(options.postEffect.dof.gain);
+			gui.children[5].children[5].children[6].setValue(options.postEffect.dof.bias);
+			gui.children[5].children[5].children[7].setValue(options.postEffect.dof.dithering);
 
 			gui.children[5].children[6].children[0].setValue(options.postEffect.fxaa.active);
 
@@ -358,7 +382,8 @@ export class UIControl {
 
 			gui.children[5].children[12].children[0].setValue(options.postEffect.lensflare.active);
 
-			gui.children[6].children[0].setValue(options.debuggers.type);
+			gui.children[6].children[0].setValue(options.debuggers.showPickFocus);
+			gui.children[6].children[1].setValue(options.debuggers.type);
 
 			gui.children[7].children[2].setValue(options.animation.timeScale);
 		}
