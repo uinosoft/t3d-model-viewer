@@ -20,8 +20,9 @@ import { MeshoptDecoder } from './libs/meshopt_decoder.module.js';
 import * as KTXParse from './libs/ktx-parse.module.js';
 import { ZSTDDecoder } from './libs/zstddec.module.js';
 import { Raycaster } from 't3d/examples/jsm/Raycaster.js';
-
+import { ShadowAdapter } from 't3d/examples/jsm/math/ShadowAdapter.js';
 import { default as TWEEN } from '@tweenjs/tween.js';
+// import { Box3Helper } from 't3d/examples/jsm/objects/Box3Helper.js';
 
 export class Viewer {
 
@@ -103,6 +104,7 @@ export class Viewer {
 
 		const directionalLight = new DirectionalLight(0xffffff, 0.7);
 		directionalLight.castShadow = true;
+		directionalLight.shadowAdapter = false;
 		directionalLight.shadow.cameraNear = 1;
 		directionalLight.shadow.cameraFar = 20;
 		directionalLight.shadow.mapSize.set(2048, 2048);
@@ -117,6 +119,7 @@ export class Viewer {
 		scene.add(directionalLightCamera);
 
 		const directionalLight2 = new DirectionalLight(0xffffff, 0);
+		directionalLight2.shadowAdapter = false;
 		directionalLight2.shadow.cameraNear = 1;
 		directionalLight2.shadow.cameraFar = 20;
 		directionalLight2.shadow.mapSize.set(2048, 2048);
@@ -256,6 +259,9 @@ export class Viewer {
 		this._directionalLightCamera.position.set(this._camera.position.x, this._camera.position.y, this._camera.position.z);
 		this._directionalLightCamera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
+		updateLightDirectionByShadowAdapter(this._directionalLight, this._camera, this._boundingBox, this._boundingSphere);
+		updateLightDirectionByShadowAdapter(this._directionalLight2, this._camera, this._boundingBox, this._boundingSphere);
+
 		const focalTargetViewPos = _vec3_1.copy(this._focalTarget.position).applyMatrix4(this._camera.viewMatrix);
 		this._effectComposer.updateDOFFocalDepth(-focalTargetViewPos.z);
 
@@ -379,6 +385,9 @@ export class Viewer {
 					root.position.y += (root.position.y - center.y);
 					root.position.z += (root.position.z - center.z);
 					getBoundingBox(root, this._boundingBox);// For models without animation
+
+					// const boxHelper = new Box3Helper(this._boundingBox);
+					// this._scene.add(boxHelper);
 
 					this.setCameraState(true);
 
@@ -661,12 +670,16 @@ export class Viewer {
 			this._directionalLight.shadow.bias = options.shadowbias;
 			const mapSize = ({ 'Ultra': 4096, 'High': 2048, 'Medium': 1024, 'Low': 512 })[options.shadowquality];
 			this._directionalLight.shadow.mapSize.set(mapSize, mapSize);
+			this._directionalLight.shadowAdapter = options.shadowAdapter;
+			this._directionalLight.shadowDistanceScale = options.shadowDistanceScale;
 		}
 		if (light == 2) {
 			this._directionalLight2.castShadow = options.shadowenable;
 			this._directionalLight2.shadow.bias = options.shadowbias;
 			const mapSize = ({ 'Ultra': 4096, 'High': 2048, 'Medium': 1024, 'Low': 512 })[options.shadowquality];
 			this._directionalLight2.shadow.mapSize.set(mapSize, mapSize);
+			this._directionalLight2.shadowAdapter = options.shadowAdapter;
+			this._directionalLight2.shadowDistanceScale = options.shadowDistanceScale;
 		}
 	}
 
@@ -780,9 +793,12 @@ function setBoundingSphereByBox(box, target) {
 }
 
 function updateLightDirection(light, coord, radius) {
-	const phi = Math.PI / 2 - coord.y * Math.PI / 180;
-	const theta = coord.x * Math.PI / 180;
-	const spherical = new Spherical(radius, phi, theta);
+	light.phi = Math.PI / 2 - coord.y * Math.PI / 180;
+	light.theta = coord.x * Math.PI / 180;
+
+	if (light.shadowAdapter) return;
+
+	const spherical = new Spherical(radius, light.phi, light.theta);
 	const position = new Vector3().setFromSpherical(spherical);
 
 	light.position.set(position.x, position.y, position.z);
@@ -792,6 +808,15 @@ function updateLightDirection(light, coord, radius) {
 	light.shadow.windowSize = radius * 10;
 	light.shadow.cameraNear = radius / 50;
 	light.shadow.cameraFar = radius * 5;
+}
+
+const _shadowAdapterSphere = new Sphere();
+function updateLightDirectionByShadowAdapter(light, camera, box, sphere) {
+	if (!light.shadowAdapter) return;
+
+	ShadowAdapter.getSphereByBox3AndCamera(box, camera, 1, sphere.radius * 2 * light.shadowDistanceScale, _shadowAdapterSphere);
+	ShadowAdapter.setDirectionalLight(light, light.phi, light.theta, _shadowAdapterSphere);
+	light.shadow.cameraFar = light.shadow.cameraNear + sphere.radius * 5; // fix camera length
 }
 
 // morphTransform

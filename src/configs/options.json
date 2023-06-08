@@ -1,5 +1,5 @@
 {
-    "version": "0.0.3",
+    "version": "0.0.4",
     "global": {
         "wireframe": false
     },
@@ -34,7 +34,9 @@
                 "lensflare": false,
                 "shadowenable": true,
                 "shadowbias": -0.004,
-                "shadowquality": "High"
+                "shadowquality": "High",
+                "shadowAdapter": false,
+                "shadowDistanceScale": 0.5
             },
             "directional2": {
                 "intensity": 0,
@@ -46,7 +48,9 @@
                 "lensflare": false,
                 "shadowenable": false,
                 "shadowbias": -0.004,
-                "shadowquality": "High"
+                "shadowquality": "High",
+                "shadowAdapter": false,
+                "shadowDistanceScale": 0.5
             },
             "cameraDirectional": {
                 "intensity": 0.2,

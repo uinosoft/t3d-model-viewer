@@ -56,8 +56,8 @@ export class UIControl {
 		ambientFolder.addColor(options.light.ambient, 'color');
 
 		const directional1Folder = lightFolder.addFolder('Directional Light 1').onChange(() => {
-			viewer.setDirectionalLight(options.light.directional.directional1, 1);
 			viewer.setShadow(options.light.directional.directional1, 1);
+			viewer.setDirectionalLight(options.light.directional.directional1, 1);
 		});
 		directional1Folder.add(options.light.directional.directional1, 'intensity', 0, 1, 0.001);
 		directional1Folder.addColor(options.light.directional.directional1, 'color');
@@ -68,10 +68,12 @@ export class UIControl {
 		directional1Folder.add(options.light.directional.directional1, 'shadowenable');
 		directional1Folder.add(options.light.directional.directional1, 'shadowbias', -0.1, 0.1, 0.0001);
 		directional1Folder.add(options.light.directional.directional1, 'shadowquality', ['Low', 'Medium', 'High', 'Ultra']);
+		directional1Folder.add(options.light.directional.directional1, 'shadowAdapter');
+		directional1Folder.add(options.light.directional.directional1, 'shadowDistanceScale', 0, 1, 0.01);
 
 		const directional2Folder = lightFolder.addFolder('Directional Light 2').onChange(() => {
+			viewer.setShadow(options.light.directional.directional2, 2); // TODO merge this method with .setDirectionalLight
 			viewer.setDirectionalLight(options.light.directional.directional2, 2);
-			viewer.setShadow(options.light.directional.directional2, 2)
 		});
 		directional2Folder.add(options.light.directional.directional2, 'intensity', 0, 1, 0.001);
 		directional2Folder.addColor(options.light.directional.directional2, 'color');
@@ -82,6 +84,8 @@ export class UIControl {
 		directional2Folder.add(options.light.directional.directional2, 'shadowenable');
 		directional2Folder.add(options.light.directional.directional2, 'shadowbias', -0.1, 0.1, 0.0001);
 		directional2Folder.add(options.light.directional.directional2, 'shadowquality', ['Low', 'Medium', 'High', 'Ultra']);
+		directional2Folder.add(options.light.directional.directional2, 'shadowAdapter');
+		directional2Folder.add(options.light.directional.directional2, 'shadowDistanceScale', 0, 1, 0.01);
 
 		const cameraDirectional = lightFolder.addFolder('Camera Directional Light').onChange(() => {
 			viewer.setDirectionalLight(options.light.directional.cameraDirectional, 0)
@@ -301,7 +305,7 @@ export class UIControl {
 		this.updateUIByModelBounds = function(radius) {
 			const focalLength = getDOFFocalLength(radius);
 
-			options.postEffect.dof.focalLength = focalLength;
+			options.postEffect.dof.focalLength = focalLength; // TODO delete this?
 
 			gui.children[5].children[5].children[1]
 				.setValue(options.postEffect.dof.focalLength)
@@ -335,6 +339,8 @@ export class UIControl {
 			gui.children[4].children[1].children[4].setValue(options.light.directional.directional1.shadowenable);
 			gui.children[4].children[1].children[5].setValue(options.light.directional.directional1.shadowbias);
 			gui.children[4].children[1].children[6].setValue(options.light.directional.directional1.shadowquality);
+			gui.children[4].children[1].children[7].setValue(options.light.directional.directional1.shadowAdapter);
+			gui.children[4].children[1].children[8].setValue(options.light.directional.directional1.shadowDistanceScale);
 
 			gui.children[4].children[2].children[0].setValue(options.light.directional.directional2.intensity);
 			gui.children[4].children[2].children[1].setValue(options.light.directional.directional2.color);
@@ -344,6 +350,8 @@ export class UIControl {
 			gui.children[4].children[2].children[4].setValue(options.light.directional.directional2.shadowenable);
 			gui.children[4].children[2].children[5].setValue(options.light.directional.directional2.shadowbias);
 			gui.children[4].children[2].children[6].setValue(options.light.directional.directional2.shadowquality);
+			gui.children[4].children[2].children[7].setValue(options.light.directional.directional2.shadowAdapter);
+			gui.children[4].children[2].children[8].setValue(options.light.directional.directional2.shadowDistanceScale);
 
 			gui.children[4].children[3].children[0].setValue(options.light.directional.cameraDirectional.intensity);
 			gui.children[4].children[3].children[1].setValue(options.light.directional.cameraDirectional.color);
