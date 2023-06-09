@@ -1,6 +1,6 @@
 {
   "name": "t3d-model-viewer",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "A model viewer based on t3d.js",
   "author": "uino",
   "license": "BSD-3-Clause",
@@ -11,7 +11,7 @@
     "vite": "^4.1.1"
   },
   "dependencies": {
-    "@tweenjs/tween.js": "^18.6.4",
+    "@tweenjs/tween.js": "^20.0.3",
     "glob-to-regexp": "^0.4.1",
     "gltf-validator": "^2.0.0-dev.3.9",
     "lil-gui": "^0.18.0",
