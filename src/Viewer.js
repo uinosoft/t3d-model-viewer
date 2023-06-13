@@ -90,7 +90,8 @@ export class Viewer {
 		groundMaterial.polygonOffsetUnits = 1;
 		scene.add(ground);
 
-		const focalTarget = new Mesh(new SphereGeometry(0.02, 20, 20), new PBRMaterial());
+		const focalTarget = new Mesh(new SphereGeometry(1, 12, 6), new PBRMaterial());
+		focalTarget.scale.set(0.00001, 0.00001, 0.00001);
 		focalTarget.material.diffuse.setHex(0xff0000);
 		focalTarget.visible = false;
 		scene.add(focalTarget);
@@ -683,6 +684,8 @@ export class Viewer {
 	}
 
 	updateFocalTarget(target) {
+		const focalScale = this._boundingSphere.radius / 100;
+		this._focalTarget.scale.set(focalScale, focalScale, focalScale);
 		this._focalTarget.position.fromArray(target);
 	}
 

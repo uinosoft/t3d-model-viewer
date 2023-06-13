@@ -274,6 +274,41 @@ export class UIControl {
 			}
 		}
 
+		function getDOFFocalLength(radius) {
+			const diagonal = radius * 2;
+
+			let focalLength = 24;
+
+			if (diagonal < 5) {
+				focalLength = diagonal * 10;
+			} else if (diagonal < 10) {
+				focalLength = diagonal * 5;
+			} else if (diagonal < 100) {
+				focalLength = diagonal * 2.5;
+			} else if (diagonal < 1000) {
+				focalLength = diagonal * 1;
+			} else if (diagonal < 10000) {
+				focalLength = diagonal * 0.5;
+			} else if (diagonal < 50000) {
+				focalLength = diagonal * 0.1;
+			} else if (diagonal < 100000) {
+				focalLength = diagonal * 0.05;
+			}
+
+			return Math.round(focalLength);
+		}
+
+		this.updateUIByModelBounds = function(radius) {
+			const focalLength = getDOFFocalLength(radius);
+
+			options.postEffect.dof.focalLength = focalLength;
+
+			gui.children[5].children[5].children[1]
+				.setValue(options.postEffect.dof.focalLength)
+				.max(focalLength * 2)
+				.updateDisplay();
+		}
+
 		this.updateOptions = function(options) {
 			gui.children[0].children[0].setValue(options.global.wireframe);
 
