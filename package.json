@@ -11,14 +11,14 @@
     "vite": "^4.1.1"
   },
   "dependencies": {
-    "@tweenjs/tween.js": "^20.0.3",
+    "@tweenjs/tween.js": "^21.0.0",
     "glob-to-regexp": "^0.4.1",
     "gltf-validator": "^2.0.0-dev.3.9",
     "lil-gui": "^0.18.0",
     "nanobar": "^0.4.2",
     "simple-dropzone": "^0.8.1",
-    "t3d": "^0.1.4",
-    "t3d-effect-composer": "^0.0.8"
+    "t3d": "^0.1.5",
+    "t3d-effect-composer": "^0.0.9"
   },
   "scripts": {
     "dev": "vite",
