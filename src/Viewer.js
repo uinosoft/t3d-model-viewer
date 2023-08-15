@@ -1,4 +1,4 @@
-import { Renderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
+import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
 	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE,
 	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
 import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
@@ -47,7 +47,7 @@ export class Viewer {
 			stencil: true
 		});
 
-		const renderer = new Renderer(gl);
+		const renderer = new WebGLRenderer(gl);
 		renderer.setClearColor(0.2, 0.2, 0.2, 1);
 
 		this.clock = new Clock();
