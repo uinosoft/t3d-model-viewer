@@ -48,7 +48,7 @@ export class Viewer {
 		});
 
 		const renderer = new Renderer(gl);
-		renderer.renderPass.setClearColor(0.2, 0.2, 0.2, 1);
+		renderer.setClearColor(0.2, 0.2, 0.2, 1);
 
 		this.clock = new Clock();
 
@@ -719,7 +719,7 @@ export class Viewer {
 			node.geometry.dispose();
 		});
 
-		this._renderer.renderPass.clear(true, true, false);
+		this._renderer.clear(true, true, false);
 	}
 
 	extractUrlBase(url) {

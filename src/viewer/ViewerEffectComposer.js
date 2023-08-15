@@ -12,9 +12,9 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 	constructor(width, height, renderer) {
 		super(width, height, {
-			samplerNumber: Math.min(renderer.renderPass.capabilities.maxSamples, 5),
+			samplerNumber: Math.min(renderer.capabilities.maxSamples, 5),
 			webgl2: true,
-			floatColorBuffer: !!renderer.renderPass.capabilities.getExtension("EXT_color_buffer_float")
+			floatColorBuffer: !!renderer.capabilities.getExtension("EXT_color_buffer_float")
 		});
 
 		this.sceneMSAA = true;
