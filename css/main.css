@@ -42,25 +42,43 @@ body {
 .header {
     background-color: var(--side-background-color);
     display: flex;
+    justify-content: space-between;
     padding: 0 2em;
     height: 4rem;
-    line-height: 4rem;
-    align-items: center;
+    align-items: baseline;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
     box-shadow: 0px 0px 8px 2px rgba(0, 0, 0, 0.3);
     z-index: 1;
     -webkit-app-region: drag;
+    font-family: 'body', 'Arial', sans-serif;
+}
+
+.header a {
+    color: inherit;
+    font-size: inherit;
+    text-decoration: inherit;
 }
 
 .header h1 {
     font-size: 24px;
-    font-family: 'body', 'Arial', sans-serif;
     color: var(--highlight-color);
-    text-align: center;
     margin: 0;
     padding: 0.67em 0;
+}
+
+.header .links {
+    font-size: 14px;
+    color: #AAA;
+    margin: 0;
+    font-weight: bold;
+}
+
+@media (max-width: 640px) {
+    .header .links {
+        display: none;
+    }
 }
 
 .dropzone {
