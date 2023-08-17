@@ -45,7 +45,7 @@ export class UIControl {
 		});
 		cameraFolder.add(options.camera, 'fov', 10, 180, 1);
 		cameraFolder.add(options.camera, 'type', ['perspective', 'othographic']);
-		cameraFolder.add(options.camera, 'outputEncoding', ['Linear', 'Gamma']);
+		cameraFolder.add(options.camera, 'outputEncoding', ['SRGB', 'Gamma', 'Linear']);
 
 		// Light
 

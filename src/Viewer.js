@@ -568,11 +568,16 @@ export class Viewer {
 			this._cameraDefault = 'othographic';
 		}
 
-		if (options.outputEncoding === 'Gamma') {
-			this._camera.outputEncoding = TEXEL_ENCODING_TYPE.GAMMA;
-		} else {
-			this._camera.outputEncoding = TEXEL_ENCODING_TYPE.LINEAR;
+		let encoding = TEXEL_ENCODING_TYPE.LINEAR;
+
+		if (options.outputEncoding === 'SRGB') {
+			encoding = TEXEL_ENCODING_TYPE.SRGB;
+		} else if (options.outputEncoding === 'Gamma') {
+			encoding = TEXEL_ENCODING_TYPE.GAMMA;
 		}
+
+		this._camera.outputEncoding = encoding;
+		this._effectComposer.getBuffer('SceneBuffer').setOutputEncoding(encoding);
 	}
 
 	setCameraState(resetStart) {
