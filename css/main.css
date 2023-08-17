@@ -75,7 +75,7 @@ body {
     font-weight: bold;
 }
 
-@media (max-width: 640px) {
+@media all and (max-width: 640px) {
     .header .links {
         display: none;
     }
@@ -170,13 +170,8 @@ body {
 
 @media all and (max-width: 640px) {
 	.lil-gui.root { 
-		right: auto;
-		top: 64px;
 		max-height: 50%;
 		max-width: 80%;
-        position: absolute;
-		bottom: 0;
-		left: 0;
 	}
 }
 

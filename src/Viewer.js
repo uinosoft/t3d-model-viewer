@@ -216,10 +216,6 @@ export class Viewer {
 
 		this._raycaster = new Raycaster();
 		this._focalTarget = focalTarget;
-
-		window.addEventListener("resize", () => {
-			this.resize();
-		}, true);
 	}
 
 	startRender() {

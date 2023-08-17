@@ -17,14 +17,16 @@ export class App {
 		this.dropEl = document.querySelector(".dropzone");
 		this.inputEl = document.querySelector("#file-input");
 		this.spinnerEl = el.querySelector(".spinner");
+		this.headerEl = document.querySelector(".header");
 
-		// create dropzone
 		const dropzone = new SimpleDropzone(this.dropEl, this.inputEl);
 		dropzone.on("drop", ({ files }) => this.load(files));
 		dropzone.on("dropstart", () => this.showSpinner());
 		dropzone.on("droperror", () => this.hideSpinner());
 
-		// prepare built-in models
+		this.hideSpinner();
+
+		// Prepare built-in models
 		for (const { name, uri } of modelList.array) {
 			document.querySelector(`#model-${name}`).onclick = () => {
 				this.showSpinner();
@@ -32,7 +34,19 @@ export class App {
 			}
 		}
 
-		this.hideSpinner();
+		// Press F8 to toggle UI
+		document.addEventListener("keydown", e => {
+			if (e.key === "F8" && this.uiCtrl !== null) {
+				this.headerEl.style.display = this.headerEl.style.display === "none" ? "" : "none";
+				this.uiCtrl.toggleHidden();
+				this.viewer.resize();
+			}
+		});
+
+		// Resize viewer on window resize
+		window.addEventListener("resize", () => {
+			this.viewer && this.viewer.resize();
+		}, true);
 	}
 
 	showSpinner() {

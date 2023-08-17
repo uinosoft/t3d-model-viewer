@@ -430,6 +430,10 @@ export class UIControl {
 
 			gui.children[7].children[2].setValue(options.animation.timeScale);
 		}
+
+		this.toggleHidden = function() {
+			gui.show(gui._hidden);
+		}
 	}
 
 }
