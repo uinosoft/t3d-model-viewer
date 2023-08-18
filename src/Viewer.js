@@ -365,6 +365,10 @@ export class Viewer {
 							if (emissive.r + emissive.g + emissive.b > 0.0) {
 								node.effects = { 'Glow': 1 }
 							}
+							if (node.material.type === 'basic') {
+								// remove envMap effect for basic material
+								node.material.envMap = undefined;
+							}
 						}
 
 						if (!_rootBones.includes(node) && node.isBone && !node.parent.isBone) {
