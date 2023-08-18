@@ -2,6 +2,10 @@ import { GUI } from 'lil-gui';
 import defaultOptions from './configs/options.json';
 import { cloneJson, exportFileJSON, importFileJSON, upgradeJson } from './Utils.js';
 
+const MAX_ENV_INTENSITY = 2;
+const MAX_AMBIENT_LIGHT_INTENSITY = 2;
+const MAX_DIR_LIGHT_INTENSITY = 4;
+
 export class UIControl {
 
 	constructor(viewer) {
@@ -35,7 +39,7 @@ export class UIControl {
 			}
 		});
 		environmentFolder.add(options.environment, 'texture', ['Pisa', 'Factory_Catwalk', 'Barce_Rooftop_C', 'Grand_Canyon_C', 'Hall', 'Ice_Lake', 'Old_Industrial_Hall']);
-		environmentFolder.add(options.environment, 'diffuseIntensity', 0, 1, 0.001);
+		environmentFolder.add(options.environment, 'diffuseIntensity', 0, MAX_ENV_INTENSITY, 0.001);
 		environmentFolder.add(options.environment, 'skyRoughness', 0, 8, 0.1);
 
 		// Camera
@@ -52,14 +56,14 @@ export class UIControl {
 		const lightFolder = gui.addFolder('Lights');
 
 		const ambientFolder = lightFolder.addFolder('Ambient Light').onChange(() => viewer.setAmbientLight(options.light.ambient));
-		ambientFolder.add(options.light.ambient, 'intensity', 0, 1, 0.001);
+		ambientFolder.add(options.light.ambient, 'intensity', 0, MAX_AMBIENT_LIGHT_INTENSITY, 0.001);
 		ambientFolder.addColor(options.light.ambient, 'color');
 
 		const directional1Folder = lightFolder.addFolder('Directional Light 1').onChange(() => {
 			viewer.setShadow(options.light.directional.directional1, 1);
 			viewer.setDirectionalLight(options.light.directional.directional1, 1);
 		});
-		directional1Folder.add(options.light.directional.directional1, 'intensity', 0, 1, 0.001);
+		directional1Folder.add(options.light.directional.directional1, 'intensity', 0, MAX_DIR_LIGHT_INTENSITY, 0.001);
 		directional1Folder.addColor(options.light.directional.directional1, 'color');
 		const rotation1Folder = directional1Folder.addFolder('direction');
 		rotation1Folder.add(options.light.directional.directional1.direction, 'x', 0, 360, 0.01).name('horizontal');
@@ -75,7 +79,7 @@ export class UIControl {
 			viewer.setShadow(options.light.directional.directional2, 2); // TODO merge this method with .setDirectionalLight
 			viewer.setDirectionalLight(options.light.directional.directional2, 2);
 		});
-		directional2Folder.add(options.light.directional.directional2, 'intensity', 0, 1, 0.001);
+		directional2Folder.add(options.light.directional.directional2, 'intensity', 0, MAX_DIR_LIGHT_INTENSITY, 0.001);
 		directional2Folder.addColor(options.light.directional.directional2, 'color');
 		const rotation2Folder = directional2Folder.addFolder('direction');
 		rotation2Folder.add(options.light.directional.directional2.direction, 'x', 0, 360, 0.01).name('horizontal');
@@ -90,7 +94,7 @@ export class UIControl {
 		const cameraDirectional = lightFolder.addFolder('Camera Directional Light').onChange(() => {
 			viewer.setDirectionalLight(options.light.directional.cameraDirectional, 0)
 		});
-		cameraDirectional.add(options.light.directional.cameraDirectional, 'intensity', 0, 1, 0.001);
+		cameraDirectional.add(options.light.directional.cameraDirectional, 'intensity', 0, MAX_DIR_LIGHT_INTENSITY, 0.001);
 		cameraDirectional.addColor(options.light.directional.cameraDirectional, 'color');
 
 		// Post Effect
