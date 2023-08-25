@@ -1,5 +1,5 @@
 {
-    "version": "0.0.4",
+    "version": "0.0.5",
     "global": {
         "wireframe": false
     },
@@ -136,7 +136,13 @@
             "scanlinesIntensity": 0.5, 
             "scanlinesCount": 2048, 
             "grayscale": true
-        }, 
+        },
+        "toneMapping": {
+            "active": false,
+            "toneMappingType": "Linear",
+            "toneMappingExposure": 1,
+            "outputColorSpace": "SRGB"
+        },
         "lensflare": {
             "active": true
         }

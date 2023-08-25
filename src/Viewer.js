@@ -22,6 +22,7 @@ import { ZSTDDecoder } from './libs/zstddec.module.js';
 import { Raycaster } from 't3d/examples/jsm/Raycaster.js';
 import { ShadowAdapter } from 't3d/examples/jsm/math/ShadowAdapter.js';
 import { default as TWEEN } from '@tweenjs/tween.js';
+import { ColorSpaceType } from './Utils.js';
 // import { Box3Helper } from 't3d/examples/jsm/objects/Box3Helper.js';
 
 export class Viewer {
@@ -572,14 +573,7 @@ export class Viewer {
 			this._cameraDefault = 'othographic';
 		}
 
-		let encoding = TEXEL_ENCODING_TYPE.LINEAR;
-
-		if (options.outputEncoding === 'SRGB') {
-			encoding = TEXEL_ENCODING_TYPE.SRGB;
-		} else if (options.outputEncoding === 'Gamma') {
-			encoding = TEXEL_ENCODING_TYPE.GAMMA;
-		}
-
+		let encoding = ColorSpaceType[options.outputEncoding] || TEXEL_ENCODING_TYPE.LINEAR;
 		this._camera.outputEncoding = encoding;
 		this._effectComposer.getBuffer('SceneBuffer').setOutputEncoding(encoding);
 	}

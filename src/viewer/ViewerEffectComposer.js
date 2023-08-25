@@ -1,12 +1,13 @@
 import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
 import { GeometryUtils } from 't3d/examples/jsm/geometries/GeometryUtils.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
-import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask } from 't3d-effect-composer';
+import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType } from 't3d-effect-composer';
 import { UVBuffer } from 't3d-effect-composer/examples/jsm/uv/UVBuffer.js';
 import { UVDebugger } from 't3d-effect-composer/examples/jsm/uv/UVDebugger.js';
 import { LensflareDebugger } from 't3d-effect-composer/examples/jsm/lensflare/LensflareDebugger.js';
 import { LensflareBuffer } from 't3d-effect-composer/examples/jsm/lensflare/LensflareBuffer.js';
 import { LensflareEffect } from 't3d-effect-composer/examples/jsm/lensflare/LensflareEffect.js';
+import { ColorSpaceType } from '../Utils';
 
 export class ViewerEffectComposer extends DefaultEffectComposer {
 
@@ -14,7 +15,8 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		super(width, height, {
 			samplerNumber: Math.min(renderer.capabilities.maxSamples, 5),
 			webgl2: true,
-			floatColorBuffer: !!renderer.capabilities.getExtension("EXT_color_buffer_float")
+			floatColorBuffer: !!renderer.capabilities.getExtension("EXT_color_buffer_float"),
+			highDynamicRange: true
 		});
 
 		this.sceneMSAA = true;
@@ -46,6 +48,12 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 		this.addEffect('Lensflare', new LensflareEffect(), 101.5);
 		this.getEffect('Lensflare').active = true;
+
+		this.addEffect('ToneMapping', new ToneMappingEffect(), 199);
+		this.getEffect('ToneMapping').active = false;
+		this.getEffect('ToneMapping').toneMapping = ToneMappingType.Linear;
+		this.getEffect('ToneMapping').toneMappingExposure = 1;
+		this.getEffect('ToneMapping').outputColorSpace = 'SRGB';
 
 		this._gBufferDebugger = new GBufferDebugger();
 		this._ssaoDebugger = new SSAODebugger();
@@ -121,6 +129,12 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 				filmEffect[key] = options.film[key];
 			}
 		}
+
+		const toneMappingEffect = this.getEffect('ToneMapping');
+		toneMappingEffect.active = options.toneMapping.active;
+		toneMappingEffect.toneMapping = ToneMappingType[options.toneMapping.toneMappingType];
+		toneMappingEffect.toneMappingExposure = options.toneMapping.toneMappingExposure;
+		toneMappingEffect.outputColorSpace = ColorSpaceType[options.toneMapping.outputColorSpace];
 
 		const lensflareEffect = this.getEffect('Lensflare');
 		lensflareEffect.active = options.lensflare.active;

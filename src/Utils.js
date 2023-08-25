@@ -1,3 +1,4 @@
+import { TEXEL_ENCODING_TYPE } from 't3d';
 import defaultOptions from './configs/options.json';
 
 function readFileJSON(ev) {
@@ -143,3 +144,9 @@ class JsonTools {
 	}
 
 }
+
+export const ColorSpaceType = {
+	'SRGB': TEXEL_ENCODING_TYPE.SRGB,
+	'Gamma': TEXEL_ENCODING_TYPE.GAMMA,
+	'Linear': TEXEL_ENCODING_TYPE.LINEAR,
+};
