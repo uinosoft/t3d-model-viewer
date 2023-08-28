@@ -217,6 +217,9 @@ export class Viewer {
 
 		this._raycaster = new Raycaster();
 		this._focalTarget = focalTarget;
+
+		this._dirty = true;
+		this._staticCount = 0;
 	}
 
 	startRender() {
@@ -244,14 +247,20 @@ export class Viewer {
 	tick(timeStamp) {
 		TWEEN.update();
 
-		this._cameraControl.update();
+		let renderDirty = this._cameraControl.update() || this._dirty;
 
 		this._scene.updateMatrix();
 		this._scene.updateRenderStates(this._camera);
 		this._scene.updateRenderQueue(this._camera);
 
 		this._shadowMapPass.render(this._renderer, this._scene);
-		this.animations && this.animations.update(this.clock.getDelta() * this.timeScale);
+
+		if (this.animations) {
+			this.animations.update(this.clock.getDelta() * this.timeScale);
+			if (hasRunningAction(this.animations.getActions())) {
+				renderDirty = true;
+			}
+		}
 
 		this._directionalLightCamera.position.set(this._camera.position.x, this._camera.position.y, this._camera.position.z);
 		this._directionalLightCamera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
@@ -261,6 +270,16 @@ export class Viewer {
 
 		const focalTargetViewPos = _vec3_1.copy(this._focalTarget.position).applyMatrix4(this._camera.viewMatrix);
 		this._effectComposer.updateDOFFocalDepth(-focalTargetViewPos.z);
+
+		if (renderDirty) {
+			this._staticCount = 10;
+			this._dirty = false;
+		}
+
+		this._staticCount--;
+		if (this._staticCount > 0) {
+			this._effectComposer.dirty();
+		}
 
 		this._effectComposer.render(this._renderer, this._scene, this._camera, this._backRenderTarget);
 	}
@@ -296,6 +315,8 @@ export class Viewer {
 		}
 		this._backRenderTarget.resize(width, height);
 		this._effectComposer.resize(width, height);
+
+		this._dirty = true;
 	}
 
 	load(url, rootPath, assetMap) {
@@ -461,6 +482,8 @@ export class Viewer {
 				node.material.wireframe = this._wireframe;
 			}
 		});
+
+		this._dirty = true;
 	}
 
 	setGround(options) {
@@ -472,6 +495,8 @@ export class Viewer {
 		this._ground.material.uniforms.size = size / 2;
 		this._ground.material.uniforms.gridSize = size / 10;
 		this._ground.material.uniforms.gridSize2 = size / 50;
+
+		this._dirty = true;
 	}
 
 	setEnvironmentTexture(key) {
@@ -504,6 +529,8 @@ export class Viewer {
 
 				this._scene.environment = texture;
 				this._skyBox.texture = texture;
+
+				this._dirty = true;
 			});
 		}
 	}
@@ -511,12 +538,16 @@ export class Viewer {
 	setEnvironmentParams(options) {
 		this._scene.environmentLightIntensity = options.diffuseIntensity;
 		this._skyBox.level = options.skyRoughness;
+
+		this._dirty = true;
 	}
 
 	setAmbientLight(options) {
 		this._ambientLight.intensity = options.intensity;
 
 		setColor(this._ambientLight.color, options.color);
+
+		this._dirty = true;
 	}
 
 	setDirectionalLight(options, light) {
@@ -546,15 +577,19 @@ export class Viewer {
 
 			this._directionalLight2.children[0].visible = options.lensflare;
 		}
+
+		this._dirty = true;
 	}
 
 	setPostEffect(options) {
 		this._effectComposer.setOptions(options);
+		this._dirty = true;
 	}
 
 	setDebugger(options) {
 		this._effectComposer.setDebugger(options);
 		this._focalTarget.visible = options.showPickFocus;
+		this._dirty = true;
 	}
 
 	setCamera(options) {
@@ -576,6 +611,8 @@ export class Viewer {
 		let encoding = ColorSpaceType[options.outputEncoding] || TEXEL_ENCODING_TYPE.LINEAR;
 		this._camera.outputEncoding = encoding;
 		this._effectComposer.getBuffer('SceneBuffer').setOutputEncoding(encoding);
+
+		this._dirty = true;
 	}
 
 	setCameraState(resetStart) {
@@ -620,6 +657,8 @@ export class Viewer {
 		this._cameraClip.far = cameraFar;
 
 		this._cameraControl.saveState();
+
+		this._dirty = true;
 	}
 
 	runCameraAnimation(toPos) {
@@ -633,6 +672,9 @@ export class Viewer {
 			.easing(TWEEN.Easing.Quartic.InOut)
 			.delay(200)
 			.start()
+			.onUpdate(() => {
+				this._dirty = true;
+			})
 			.onComplete(() => {
 				this._cameraTween.stop();
 				this._cameraTween = null;
@@ -653,6 +695,8 @@ export class Viewer {
 		if (options.target) {
 			this._cameraControl.target =  new Vector3().fromArray(options.target);
 		}
+
+		this._dirty = true;
 	}
 
 	exportCameraView(options) {
@@ -680,6 +724,8 @@ export class Viewer {
 			this._directionalLight2.shadowAdapter = options.shadowAdapter;
 			this._directionalLight2.shadowDistanceScale = options.shadowDistanceScale;
 		}
+
+		this._dirty = true;
 	}
 
 	pickModel(event) {
@@ -699,6 +745,8 @@ export class Viewer {
 		const focalScale = this._boundingSphere.radius / 100;
 		this._focalTarget.scale.set(focalScale, focalScale, focalScale);
 		this._focalTarget.position.fromArray(target);
+
+		this._dirty = true;
 	}
 
 	clear() {
@@ -719,6 +767,8 @@ export class Viewer {
 		});
 
 		this._renderer.clear(true, true, false);
+
+		this._dirty = true;
 	}
 
 	extractUrlBase(url) {
@@ -852,7 +902,7 @@ function morphNodeTransform(object, index, target) {
 	return target;
 }
 
-export class IndexParser {
+class IndexParser {
 
 	static parse(context, loader) {
 		const { url } = context;
@@ -873,4 +923,13 @@ export class IndexParser {
 		});
 	}
 
+}
+
+function hasRunningAction(actions) {
+	for (let i = 0; i < actions.length; i++) {
+		if (actions[i].weight > 0) {
+			return true;
+		}
+	}
+	return false;
 }

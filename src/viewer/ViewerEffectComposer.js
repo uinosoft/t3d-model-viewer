@@ -1,7 +1,7 @@
 import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
 import { GeometryUtils } from 't3d/examples/jsm/geometries/GeometryUtils.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
-import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType } from 't3d-effect-composer';
+import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
 import { UVBuffer } from 't3d-effect-composer/examples/jsm/uv/UVBuffer.js';
 import { UVDebugger } from 't3d-effect-composer/examples/jsm/uv/UVDebugger.js';
 import { LensflareDebugger } from 't3d-effect-composer/examples/jsm/lensflare/LensflareDebugger.js';
@@ -12,12 +12,14 @@ import { ColorSpaceType } from '../Utils';
 export class ViewerEffectComposer extends DefaultEffectComposer {
 
 	constructor(width, height, renderer) {
-		super(width, height, {
+		const options = {
 			samplerNumber: Math.min(renderer.capabilities.maxSamples, 5),
 			webgl2: true,
 			floatColorBuffer: !!renderer.capabilities.getExtension("EXT_color_buffer_float"),
 			highDynamicRange: true
-		});
+		};
+
+		super(width, height, options);
 
 		this.sceneMSAA = true;
 
@@ -27,7 +29,7 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		this.getBuffer('SceneBuffer').setOutputEncoding(TEXEL_ENCODING_TYPE.GAMMA);
 		this.getBuffer('ColorMarkBuffer').setMaterialReplaceFunction(defaultMaterialReplaceFunction);
 		this.addBuffer('UVBuffer', new UVBuffer(width, height, { uvCheckTexture }));
-		this.addBuffer('LensflareBuffer', new LensflareBuffer(width, height));
+		this.addBuffer('LensflareBuffer', new LensflareBuffer(width, height, options));
 		this._syncAttachments();
 
 		this.getBuffer('ColorMarkBuffer').setGeometryReplaceFunction(geometryReplaceFunction);
@@ -54,6 +56,10 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		this.getEffect('ToneMapping').toneMapping = ToneMappingType.Linear;
 		this.getEffect('ToneMapping').toneMappingExposure = 1;
 		this.getEffect('ToneMapping').outputColorSpace = 'SRGB';
+
+		this.addBuffer('AccumulationBuffer', new AccumulationBuffer(width, height, options));
+		this.addEffect('TAA', new TAAEffect(), 200);
+		this.getEffect('TAA').active = false;
 
 		this._gBufferDebugger = new GBufferDebugger();
 		this._ssaoDebugger = new SSAODebugger();
@@ -136,6 +142,9 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		toneMappingEffect.toneMappingExposure = options.toneMapping.toneMappingExposure;
 		toneMappingEffect.outputColorSpace = ColorSpaceType[options.toneMapping.outputColorSpace];
 
+		const taaEffect = this.getEffect('TAA');
+		taaEffect.active = options.taa.active;
+
 		const lensflareEffect = this.getEffect('Lensflare');
 		lensflareEffect.active = options.lensflare.active;
 	}
@@ -166,6 +175,11 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 	updateDOFFocalDepth(focalDepth) {
 		const dofEffect = this.getEffect('DOF');
 		dofEffect.focalDepth = focalDepth;
+	}
+
+	dirty() {
+		const taaEffect = this.getEffect('TAA');
+		taaEffect.active && taaEffect.reset();
 	}
 
 }

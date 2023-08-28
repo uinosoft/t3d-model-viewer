@@ -1,5 +1,5 @@
 {
-    "version": "0.0.5",
+    "version": "0.0.6",
     "global": {
         "wireframe": false
     },
@@ -142,6 +142,9 @@
             "toneMappingType": "Linear",
             "toneMappingExposure": 1,
             "outputColorSpace": "SRGB"
+        },
+        "taa": {
+            "active": false
         },
         "lensflare": {
             "active": true

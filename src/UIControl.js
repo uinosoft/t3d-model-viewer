@@ -180,6 +180,9 @@ export class UIControl {
 		toneMappingEffectFolder.add(options.postEffect.toneMapping, 'toneMappingExposure', 0, 5, 0.01);
 		toneMappingEffectFolder.add(options.postEffect.toneMapping, 'outputColorSpace', ['SRGB', 'Linear']);
 
+		const taaEffectFolder = effectFolder.addFolder('TAA');
+		taaEffectFolder.add(options.postEffect.taa, 'active');
+
 		const glowEffectFolder = effectFolder.addFolder('Glow');
 		glowEffectFolder.add(options.postEffect.glow, 'active');
 		glowEffectFolder.add(options.postEffect.glow, 'strength', 0, 2, 0.01);
@@ -432,13 +435,15 @@ export class UIControl {
 			gui.children[5].children[11].children[2].setValue(options.postEffect.toneMapping.toneMappingExposure);
 			gui.children[5].children[11].children[3].setValue(options.postEffect.toneMapping.outputColorSpace);
 
-			gui.children[5].children[12].children[0].setValue(options.postEffect.glow.active);
-			gui.children[5].children[12].children[1].setValue(options.postEffect.glow.strength);
-			gui.children[5].children[12].children[2].setValue(options.postEffect.glow.radius);
-			gui.children[5].children[12].children[3].setValue(options.postEffect.glow.threshold);
-			gui.children[5].children[12].children[4].setValue(options.postEffect.glow.smoothWidth);
+			gui.children[5].children[12].children[0].setValue(options.postEffect.taa.active);
 
-			gui.children[5].children[13].children[0].setValue(options.postEffect.lensflare.active);
+			gui.children[5].children[13].children[0].setValue(options.postEffect.glow.active);
+			gui.children[5].children[13].children[1].setValue(options.postEffect.glow.strength);
+			gui.children[5].children[13].children[2].setValue(options.postEffect.glow.radius);
+			gui.children[5].children[13].children[3].setValue(options.postEffect.glow.threshold);
+			gui.children[5].children[13].children[4].setValue(options.postEffect.glow.smoothWidth);
+
+			gui.children[5].children[14].children[0].setValue(options.postEffect.lensflare.active);
 
 			gui.children[6].children[0].setValue(options.debuggers.showPickFocus);
 			gui.children[6].children[1].setValue(options.debuggers.type);
