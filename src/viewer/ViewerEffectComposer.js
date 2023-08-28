@@ -13,12 +13,15 @@ import { ColorSpaceType } from '../Utils';
 export class ViewerEffectComposer extends DefaultEffectComposer {
 
 	constructor(width, height, renderer) {
+		const urlParams = new URLSearchParams(window.location.search);
 		const options = {
 			samplerNumber: Math.min(renderer.capabilities.maxSamples, 5),
 			webgl2: true,
 			floatColorBuffer: !!renderer.capabilities.getExtension("EXT_color_buffer_float"),
-			highDynamicRange: true
+			highDynamicRange: urlParams.get('hdr') !== undefined ? !!urlParams.get('hdr') : true,
 		};
+
+		if (options.highDynamicRange) console.info('Notice: HDR is enabled, but it is currently an experimental feature.');
 
 		super(width, height, options);
 
