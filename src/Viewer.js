@@ -428,7 +428,7 @@ export class Viewer {
 					this._root = root;
 					this._scene.add(root);
 					resolve(gltf);
-					printGraph(root);
+					printGraph(root, true);
 				});
 		});
 	}
@@ -782,8 +782,9 @@ export class Viewer {
 const _vec2_1 = new Vector2();
 const _vec3_1 = new Vector3();
 
-function printGraph(node) {
-	console.group(' <' + node.constructor.name + '> ' + node.name);
+function printGraph(node, collapsed = false) {
+	const text = ' <' + node.constructor.name + '> ' + node.name;
+	collapsed ? console.groupCollapsed(text) : console.group(text);
 	node.children.forEach(child => printGraph(child));
 	console.groupEnd();
 }
