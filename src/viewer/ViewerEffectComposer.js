@@ -7,6 +7,7 @@ import { UVDebugger } from 't3d-effect-composer/examples/jsm/uv/UVDebugger.js';
 import { LensflareDebugger } from 't3d-effect-composer/examples/jsm/lensflare/LensflareDebugger.js';
 import { LensflareBuffer } from 't3d-effect-composer/examples/jsm/lensflare/LensflareBuffer.js';
 import { LensflareEffect } from 't3d-effect-composer/examples/jsm/lensflare/LensflareEffect.js';
+import SharpnessEffect from 't3d-effect-composer/examples/jsm/SharpnessEffect.js';
 import { ColorSpaceType } from '../Utils';
 
 export class ViewerEffectComposer extends DefaultEffectComposer {
@@ -60,6 +61,10 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		this.addBuffer('AccumulationBuffer', new AccumulationBuffer(width, height, options));
 		this.addEffect('TAA', new TAAEffect(), 200);
 		this.getEffect('TAA').active = false;
+
+		this.addEffect('Sharpness', new SharpnessEffect(), 201);
+		this.getEffect('Sharpness').active = false;
+		this.getEffect('Sharpness').strength = 0.2;
 
 		this._gBufferDebugger = new GBufferDebugger();
 		this._ssaoDebugger = new SSAODebugger();
@@ -144,6 +149,10 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 		const taaEffect = this.getEffect('TAA');
 		taaEffect.active = options.taa.active;
+
+		const sharpnessEffect = this.getEffect('Sharpness');
+		sharpnessEffect.active = options.sharpness.active;
+		sharpnessEffect.strength = options.sharpness.strength;
 
 		const lensflareEffect = this.getEffect('Lensflare');
 		lensflareEffect.active = options.lensflare.active;

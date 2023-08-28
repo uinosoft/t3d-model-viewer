@@ -1,5 +1,5 @@
 {
-    "version": "0.0.6",
+    "version": "0.0.7",
     "global": {
         "wireframe": false
     },
@@ -145,6 +145,10 @@
         },
         "taa": {
             "active": false
+        },
+        "sharpness": {
+            "active": false,
+            "strength": 0.2
         },
         "lensflare": {
             "active": true

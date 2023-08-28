@@ -183,6 +183,10 @@ export class UIControl {
 		const taaEffectFolder = effectFolder.addFolder('TAA');
 		taaEffectFolder.add(options.postEffect.taa, 'active');
 
+		const sharpnessEffectFolder = effectFolder.addFolder('Sharpness');
+		sharpnessEffectFolder.add(options.postEffect.sharpness, 'active');
+		sharpnessEffectFolder.add(options.postEffect.sharpness, 'strength', 0, 1, 0.01);
+
 		const glowEffectFolder = effectFolder.addFolder('Glow');
 		glowEffectFolder.add(options.postEffect.glow, 'active');
 		glowEffectFolder.add(options.postEffect.glow, 'strength', 0, 2, 0.01);
@@ -238,7 +242,14 @@ export class UIControl {
 		const fileControls = {
 			import: () => {
 				importFileJSON(_options => {
+					const oldCameraView = _options.cameraView;
+
 					_options = upgradeJson(_options);
+
+					// upgradeJson will lost cameraView, so we need to restore it.
+					if (oldCameraView) {
+						_options.cameraView = oldCameraView;
+					}
 
 					options.postEffect.dof.focalTarget = _options.postEffect.dof.focalTarget;
 					viewer.updateFocalTarget(_options.postEffect.dof.focalTarget);
@@ -437,13 +448,16 @@ export class UIControl {
 
 			gui.children[5].children[12].children[0].setValue(options.postEffect.taa.active);
 
-			gui.children[5].children[13].children[0].setValue(options.postEffect.glow.active);
-			gui.children[5].children[13].children[1].setValue(options.postEffect.glow.strength);
-			gui.children[5].children[13].children[2].setValue(options.postEffect.glow.radius);
-			gui.children[5].children[13].children[3].setValue(options.postEffect.glow.threshold);
-			gui.children[5].children[13].children[4].setValue(options.postEffect.glow.smoothWidth);
+			gui.children[5].children[13].children[0].setValue(options.postEffect.sharpness.active);
+			gui.children[5].children[13].children[1].setValue(options.postEffect.sharpness.strength);
 
-			gui.children[5].children[14].children[0].setValue(options.postEffect.lensflare.active);
+			gui.children[5].children[14].children[0].setValue(options.postEffect.glow.active);
+			gui.children[5].children[14].children[1].setValue(options.postEffect.glow.strength);
+			gui.children[5].children[14].children[2].setValue(options.postEffect.glow.radius);
+			gui.children[5].children[14].children[3].setValue(options.postEffect.glow.threshold);
+			gui.children[5].children[14].children[4].setValue(options.postEffect.glow.smoothWidth);
+
+			gui.children[5].children[15].children[0].setValue(options.postEffect.lensflare.active);
 
 			gui.children[6].children[0].setValue(options.debuggers.showPickFocus);
 			gui.children[6].children[1].setValue(options.debuggers.type);
