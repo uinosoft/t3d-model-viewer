@@ -100,10 +100,10 @@ export class Viewer {
 
 		const cameraControl = new OrbitControls(camera, canvas);
 
-		const ambientLight = new AmbientLight(0xffffff, 0.3);
+		const ambientLight = new AmbientLight(0xffffff, 0.2);
 		scene.add(ambientLight);
 
-		const directionalLight = new DirectionalLight(0xffffff, 0.7);
+		const directionalLight = new DirectionalLight(0xffffff, 0.9);
 		directionalLight.castShadow = true;
 		directionalLight.shadowAdapter = false;
 		directionalLight.shadow.cameraNear = 1;
@@ -159,7 +159,7 @@ export class Viewer {
 		directionalLight2.add(lensflareMarker2);
 
 		camera.gammaFactor = 2.0;
-		camera.outputEncoding = TEXEL_ENCODING_TYPE.GAMMA;
+		camera.outputEncoding = TEXEL_ENCODING_TYPE.SRGB;
 
 		this._textureLoader = textureLoader;
 		this._rgbeLoader = new RGBELoader();
@@ -505,6 +505,7 @@ export class Viewer {
 		if (tex) {
 			this._scene.environment = tex;
 			this._skyBox.texture = tex;
+			this._dirty = true;
 		} else {
 			this._rgbeLoader.loadAsync(`./textures/${name}.${ext}`).then(textureData => {
 				let texture = new Texture2D();

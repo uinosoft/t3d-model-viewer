@@ -4,7 +4,7 @@ import { cloneJson, exportFileJSON, importFileJSON, upgradeJson } from './Utils.
 
 const MAX_ENV_INTENSITY = 2;
 const MAX_AMBIENT_LIGHT_INTENSITY = 2;
-const MAX_DIR_LIGHT_INTENSITY = 4;
+const MAX_DIR_LIGHT_INTENSITY = 5;
 
 export class UIControl {
 

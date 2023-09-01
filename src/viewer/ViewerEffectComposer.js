@@ -30,7 +30,7 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		const uvCheckTexture = new Texture2DLoader().load('./textures/uv_checker.jpg');
 		uvCheckTexture.anisotropy = 8;
 
-		this.getBuffer('SceneBuffer').setOutputEncoding(TEXEL_ENCODING_TYPE.GAMMA);
+		this.getBuffer('SceneBuffer').setOutputEncoding(TEXEL_ENCODING_TYPE.SRGB);
 		this.getBuffer('ColorMarkBuffer').setMaterialReplaceFunction(defaultMaterialReplaceFunction);
 		this.addBuffer('UVBuffer', new UVBuffer(width, height, { uvCheckTexture }));
 		this.addBuffer('LensflareBuffer', new LensflareBuffer(width, height, options));

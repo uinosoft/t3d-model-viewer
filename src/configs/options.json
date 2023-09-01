@@ -16,16 +16,16 @@
     "camera": {
         "fov": 45,
         "type": "perspective",
-        "outputEncoding": "Gamma"
+        "outputEncoding": "SRGB"
     },
     "light": {
         "ambient": {
-            "intensity": 0.3,
+            "intensity": 0.2,
 			"color": "#ffffff"
         },
         "directional": {
             "directional1": {
-                "intensity": 0.7,
+                "intensity": 0.9,
                 "color": "#ffffff",
                 "direction": {
                     "x": 30, 
