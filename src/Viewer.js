@@ -23,6 +23,7 @@ import { Raycaster } from 't3d/examples/jsm/Raycaster.js';
 import { ShadowAdapter } from 't3d/examples/jsm/math/ShadowAdapter.js';
 import { default as TWEEN } from '@tweenjs/tween.js';
 import { ColorSpaceType } from './Utils.js';
+import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache';
 // import { Box3Helper } from 't3d/examples/jsm/objects/Box3Helper.js';
 
 export class Viewer {
@@ -58,6 +59,8 @@ export class Viewer {
 
 		const shadowMapPass = new ShadowMapPass();
 		shadowMapPass.getGeometry = geometryReplaceFunction;
+		shadowMapPass.getDepthMaterial = defaultGetDepthMaterialFn;
+		shadowMapPass.getDistanceMaterial = defaultGetDistanceMaterialFn;
 
 		const effectComposer = new ViewerEffectComposer(width, height, renderer);
 
@@ -105,11 +108,13 @@ export class Viewer {
 
 		const directionalLight = new DirectionalLight(0xffffff, 0.9);
 		directionalLight.castShadow = true;
+		directionalLight.shadow.flipSide = true;
 		directionalLight.shadowAdapter = false;
 		directionalLight.shadow.cameraNear = 1;
 		directionalLight.shadow.cameraFar = 20;
 		directionalLight.shadow.mapSize.set(2048, 2048);
 		directionalLight.shadow.bias = -0.004;
+		directionalLight.shadow.normalBias = 0.0;
 		directionalLight.shadow.windowSize = 30;
 		directionalLight.lookAt(new Vector3(), new Vector3(0, 1, 0));
 		scene.add(directionalLight);
@@ -121,10 +126,12 @@ export class Viewer {
 
 		const directionalLight2 = new DirectionalLight(0xffffff, 0);
 		directionalLight2.shadowAdapter = false;
+		directionalLight2.shadow.flipSide = true;
 		directionalLight2.shadow.cameraNear = 1;
 		directionalLight2.shadow.cameraFar = 20;
 		directionalLight2.shadow.mapSize.set(2048, 2048);
 		directionalLight2.shadow.bias = -0.004;
+		directionalLight2.shadow.normalBias = 0.0;
 		directionalLight2.shadow.windowSize = 30;
 		directionalLight2.position.set(8, 3, 8);
 		directionalLight2.lookAt(new Vector3(), new Vector3(0, 1, 0));
@@ -714,18 +721,22 @@ export class Viewer {
 		if (light == 1) {
 			this._directionalLight.castShadow = options.shadowenable;
 			this._directionalLight.shadow.bias = options.shadowbias;
+			this._directionalLight.shadow.normalBias = options.shadowNormalBias;
 			const mapSize = ({ 'Ultra': 4096, 'High': 2048, 'Medium': 1024, 'Low': 512 })[options.shadowquality];
 			this._directionalLight.shadow.mapSize.set(mapSize, mapSize);
 			this._directionalLight.shadowAdapter = options.shadowAdapter;
 			this._directionalLight.shadowDistanceScale = options.shadowDistanceScale;
+			this._directionalLight.shadow.flipSide = options.shadowFlipSide;
 		}
 		if (light == 2) {
 			this._directionalLight2.castShadow = options.shadowenable;
 			this._directionalLight2.shadow.bias = options.shadowbias;
+			this._directionalLight2.shadow.normalBias = options.shadowNormalBias;
 			const mapSize = ({ 'Ultra': 4096, 'High': 2048, 'Medium': 1024, 'Low': 512 })[options.shadowquality];
 			this._directionalLight2.shadow.mapSize.set(mapSize, mapSize);
 			this._directionalLight2.shadowAdapter = options.shadowAdapter;
 			this._directionalLight2.shadowDistanceScale = options.shadowDistanceScale;
+			this._directionalLight2.shadow.flipSide = options.shadowFlipSide;
 		}
 
 		this._dirty = true;

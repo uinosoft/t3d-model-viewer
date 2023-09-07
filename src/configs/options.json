@@ -1,5 +1,5 @@
 {
-    "version": "0.0.7",
+    "version": "0.0.8",
     "global": {
         "wireframe": false
     },
@@ -34,9 +34,11 @@
                 "lensflare": false,
                 "shadowenable": true,
                 "shadowbias": -0.004,
+                "shadowNormalBias": 0.00,
                 "shadowquality": "High",
                 "shadowAdapter": false,
-                "shadowDistanceScale": 0.5
+                "shadowDistanceScale": 0.5,
+                "shadowFlipSide": true
             },
             "directional2": {
                 "intensity": 0,
@@ -48,9 +50,11 @@
                 "lensflare": false,
                 "shadowenable": false,
                 "shadowbias": -0.004,
+                "shadowNormalBias": 0.00,
                 "shadowquality": "High",
                 "shadowAdapter": false,
-                "shadowDistanceScale": 0.5
+                "shadowDistanceScale": 0.5,
+                "shadowFlipSide": true
             },
             "cameraDirectional": {
                 "intensity": 0.2,

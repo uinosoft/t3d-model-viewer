@@ -68,12 +68,15 @@ export class UIControl {
 		const rotation1Folder = directional1Folder.addFolder('direction');
 		rotation1Folder.add(options.light.directional.directional1.direction, 'x', 0, 360, 0.01).name('horizontal');
 		rotation1Folder.add(options.light.directional.directional1.direction, 'y', 0, 90, 0.01).name('verticle');
+		const shadow1Folder = directional1Folder.addFolder('shadow');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowenable').name('enable');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowbias', -0.1, 0.1, 0.0001).name('bias');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowNormalBias', -1, 1, 0.001).name('normalBias');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowquality', ['Low', 'Medium', 'High', 'Ultra']).name('quality');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowAdapter').name('adapter');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowDistanceScale', 0, 1, 0.01).name('adapterDistScale');
+		shadow1Folder.add(options.light.directional.directional1, 'shadowFlipSide').name('flipSide');
 		directional1Folder.add(options.light.directional.directional1, 'lensflare');
-		directional1Folder.add(options.light.directional.directional1, 'shadowenable');
-		directional1Folder.add(options.light.directional.directional1, 'shadowbias', -0.1, 0.1, 0.0001);
-		directional1Folder.add(options.light.directional.directional1, 'shadowquality', ['Low', 'Medium', 'High', 'Ultra']);
-		directional1Folder.add(options.light.directional.directional1, 'shadowAdapter');
-		directional1Folder.add(options.light.directional.directional1, 'shadowDistanceScale', 0, 1, 0.01);
 
 		const directional2Folder = lightFolder.addFolder('Directional Light 2').onChange(() => {
 			viewer.setShadow(options.light.directional.directional2, 2); // TODO merge this method with .setDirectionalLight
@@ -84,12 +87,15 @@ export class UIControl {
 		const rotation2Folder = directional2Folder.addFolder('direction');
 		rotation2Folder.add(options.light.directional.directional2.direction, 'x', 0, 360, 0.01).name('horizontal');
 		rotation2Folder.add(options.light.directional.directional2.direction, 'y', 0, 90, 0.01).name('verticle');
+		const shadow2Folder = directional2Folder.addFolder('shadow');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowenable').name('enable');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowbias', -0.1, 0.1, 0.0001).name('bias');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowNormalBias', -1, 1, 0.001).name('normalBias');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowquality', ['Low', 'Medium', 'High', 'Ultra']).name('quality');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowAdapter').name('adapter');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowDistanceScale', 0, 1, 0.01).name('adapterDistScale');
+		shadow2Folder.add(options.light.directional.directional2, 'shadowFlipSide').name('flipSide');
 		directional2Folder.add(options.light.directional.directional2, 'lensflare');
-		directional2Folder.add(options.light.directional.directional2, 'shadowenable');
-		directional2Folder.add(options.light.directional.directional2, 'shadowbias', -0.1, 0.1, 0.0001);
-		directional2Folder.add(options.light.directional.directional2, 'shadowquality', ['Low', 'Medium', 'High', 'Ultra']);
-		directional2Folder.add(options.light.directional.directional2, 'shadowAdapter');
-		directional2Folder.add(options.light.directional.directional2, 'shadowDistanceScale', 0, 1, 0.01);
 
 		const cameraDirectional = lightFolder.addFolder('Camera Directional Light').onChange(() => {
 			viewer.setDirectionalLight(options.light.directional.cameraDirectional, 0)
@@ -359,23 +365,27 @@ export class UIControl {
 			gui.children[4].children[1].children[1].setValue(options.light.directional.directional1.color);
 			gui.children[4].children[1].children[2].children[0].setValue(options.light.directional.directional1.direction.x);
 			gui.children[4].children[1].children[2].children[1].setValue(options.light.directional.directional1.direction.y);
-			gui.children[4].children[1].children[3].setValue(options.light.directional.directional1.lensflare);
-			gui.children[4].children[1].children[4].setValue(options.light.directional.directional1.shadowenable);
-			gui.children[4].children[1].children[5].setValue(options.light.directional.directional1.shadowbias);
-			gui.children[4].children[1].children[6].setValue(options.light.directional.directional1.shadowquality);
-			gui.children[4].children[1].children[7].setValue(options.light.directional.directional1.shadowAdapter);
-			gui.children[4].children[1].children[8].setValue(options.light.directional.directional1.shadowDistanceScale);
+			gui.children[4].children[1].children[3].children[0].setValue(options.light.directional.directional1.shadowenable);
+			gui.children[4].children[1].children[3].children[1].setValue(options.light.directional.directional1.shadowbias);
+			gui.children[4].children[1].children[3].children[2].setValue(options.light.directional.directional1.shadowNormalBias);
+			gui.children[4].children[1].children[3].children[3].setValue(options.light.directional.directional1.shadowquality);
+			gui.children[4].children[1].children[3].children[4].setValue(options.light.directional.directional1.shadowAdapter);
+			gui.children[4].children[1].children[3].children[5].setValue(options.light.directional.directional1.shadowDistanceScale);
+			gui.children[4].children[1].children[3].children[6].setValue(options.light.directional.directional1.shadowFlipSide);
+			gui.children[4].children[1].children[4].setValue(options.light.directional.directional1.lensflare);
 
 			gui.children[4].children[2].children[0].setValue(options.light.directional.directional2.intensity);
 			gui.children[4].children[2].children[1].setValue(options.light.directional.directional2.color);
 			gui.children[4].children[2].children[2].children[0].setValue(options.light.directional.directional2.direction.x);
 			gui.children[4].children[2].children[2].children[1].setValue(options.light.directional.directional2.direction.y);
-			gui.children[4].children[2].children[3].setValue(options.light.directional.directional2.lensflare);
-			gui.children[4].children[2].children[4].setValue(options.light.directional.directional2.shadowenable);
-			gui.children[4].children[2].children[5].setValue(options.light.directional.directional2.shadowbias);
-			gui.children[4].children[2].children[6].setValue(options.light.directional.directional2.shadowquality);
-			gui.children[4].children[2].children[7].setValue(options.light.directional.directional2.shadowAdapter);
-			gui.children[4].children[2].children[8].setValue(options.light.directional.directional2.shadowDistanceScale);
+			gui.children[4].children[2].children[3].children[0].setValue(options.light.directional.directional2.shadowenable);
+			gui.children[4].children[2].children[3].children[1].setValue(options.light.directional.directional2.shadowbias);
+			gui.children[4].children[2].children[3].children[2].setValue(options.light.directional.directional2.shadowNormalBias);
+			gui.children[4].children[2].children[3].children[3].setValue(options.light.directional.directional2.shadowquality);
+			gui.children[4].children[2].children[3].children[4].setValue(options.light.directional.directional2.shadowAdapter);
+			gui.children[4].children[2].children[3].children[5].setValue(options.light.directional.directional2.shadowDistanceScale);
+			gui.children[4].children[2].children[3].children[6].setValue(options.light.directional.directional2.shadowFlipSide);
+			gui.children[4].children[2].children[4].setValue(options.light.directional.directional2.lensflare);
 
 			gui.children[4].children[3].children[0].setValue(options.light.directional.cameraDirectional.intensity);
 			gui.children[4].children[3].children[1].setValue(options.light.directional.cameraDirectional.color);
