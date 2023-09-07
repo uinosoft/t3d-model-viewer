@@ -376,8 +376,10 @@ export class Viewer {
 					blobURLs.forEach(URL.revokeObjectURL);
 					const root = gltf.root;
 					root.traverse(node => {
-						node.castShadow = true;
-						node.receiveShadow = true;
+						if (node.isMesh) {
+							node.castShadow = true;
+							node.receiveShadow = true;
+						}
 
 						if (node.material) {
 							node.material.__drawMode = node.material.drawMode;
