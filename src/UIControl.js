@@ -245,24 +245,28 @@ export class UIControl {
 
 		// Save & Load
 
+		this.importOptions = function(_options) {
+			const oldCameraView = _options.cameraView;
+
+			_options = upgradeJson(_options);
+
+			// upgradeJson will lost cameraView, so we need to restore it.
+			if (oldCameraView) {
+				_options.cameraView = oldCameraView;
+			}
+
+			options.postEffect.dof.focalTarget = _options.postEffect.dof.focalTarget;
+			viewer.updateFocalTarget(_options.postEffect.dof.focalTarget);
+
+			viewer.updateCameraView(_options.cameraView);
+
+			updateOptions(_options);
+		}
+
 		const fileControls = {
 			import: () => {
 				importFileJSON(_options => {
-					const oldCameraView = _options.cameraView;
-
-					_options = upgradeJson(_options);
-
-					// upgradeJson will lost cameraView, so we need to restore it.
-					if (oldCameraView) {
-						_options.cameraView = oldCameraView;
-					}
-
-					options.postEffect.dof.focalTarget = _options.postEffect.dof.focalTarget;
-					viewer.updateFocalTarget(_options.postEffect.dof.focalTarget);
-
-					viewer.updateCameraView(_options.cameraView);
-
-					this.updateOptions(_options);
+					this.importOptions(_options);
 				});
 			},
 			export: () => {
@@ -343,7 +347,7 @@ export class UIControl {
 				.updateDisplay();
 		}
 
-		this.updateOptions = function(options) {
+		function updateOptions(options) {
 			gui.children[0].children[0].setValue(options.global.wireframe);
 
 			gui.children[1].children[0].setValue(options.ground.show);

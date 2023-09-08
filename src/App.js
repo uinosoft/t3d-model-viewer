@@ -20,7 +20,26 @@ export class App {
 		this.headerEl = document.querySelector(".header");
 
 		const dropzone = new SimpleDropzone(this.dropEl, this.inputEl);
-		dropzone.on("drop", ({ files }) => this.load(files));
+		dropzone.on("drop", ({ files }) => {
+			let root = findRoot(files, /\.(gltf|glb)$/);
+
+			if (root) {
+				this.view(root.file, root.path, files);
+			} else {
+				if (this.viewer) {
+					root = findRoot(files, /\.json/);
+					if (root) {
+						this.viewConfig(root.file, root.path, files);
+					} else {
+						onError("No usable asset found.");
+						this.hideSpinner();
+					}
+				} else {
+					onError("Need to load the model first, but no .gltf or .glb asset found.");
+					this.hideSpinner();
+				}
+			}
+		});
 		dropzone.on("dropstart", () => this.showSpinner());
 		dropzone.on("droperror", () => this.hideSpinner());
 
@@ -57,23 +76,6 @@ export class App {
 		this.spinnerEl.style.display = "none";
 	}
 
-	load(fileMap) {
-		let rootFile;
-		let rootPath;
-		Array.from(fileMap).forEach(([path, file]) => {
-			if (file.name.match(/\.(gltf|glb)$/)) {
-				rootFile = file;
-				rootPath = path.replace(file.name, "");
-			}
-		});
-
-		if (!rootFile) {
-			onError("No .gltf or .glb asset found.");
-		}
-
-		this.view(rootFile, rootPath, fileMap);
-	}
-
 	view(rootFile, rootPath, fileMap) {
 		if (!this.viewer) {
 			this.viewerEl = document.createElement("div");
@@ -101,6 +103,21 @@ export class App {
 			});
 	}
 
+	viewConfig(rootFile, rootPath, fileMap) {
+		if (rootFile.type !== "application/json") {
+			onError("Config file must be a JSON file.");
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.onload = (event) => {
+			const jsonData = JSON.parse(event.target.result);
+			this.uiCtrl.importOptions(jsonData);
+			this.hideSpinner();
+		};
+		reader.readAsText(rootFile);
+	}
+
 }
 
 function onError(error) {
@@ -114,6 +131,19 @@ function onError(error) {
 	}
 	window.alert(message);
 	console.error(error);
+}
+
+function findRoot(files, matcher) {
+	let result;
+
+	Array.from(files).forEach(([uri, file]) => {
+		if (file.name.match(matcher)) {
+			const path = uri.replace(file.name, "");
+			result = { file, path };
+		}
+	});
+
+	return result;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
