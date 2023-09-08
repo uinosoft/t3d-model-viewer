@@ -14,6 +14,7 @@ Powered by:
 * Powerful effects - You can adjust the lighting, background, and post-processing of the preview environment.
 * Configuration import and export - Export through UI Button, drag in json file to import.
 * UI display switching - Press `F8`, make it easier to take screenshots.
+* (experimental) HDR Rendering - Visit [T3D Model Viewer (HDR)](https://uinosoft.github.io/t3d-model-viewer/?hdr=1) to experience the HDR rendering pipeline.
 
 ## Screenshots
 
