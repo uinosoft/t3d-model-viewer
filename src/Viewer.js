@@ -23,7 +23,7 @@ import { Raycaster } from 't3d/examples/jsm/Raycaster.js';
 import { ShadowAdapter } from 't3d/examples/jsm/math/ShadowAdapter.js';
 import { default as TWEEN } from '@tweenjs/tween.js';
 import { ColorSpaceType } from './Utils.js';
-import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache';
+import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache.js';
 // import { Box3Helper } from 't3d/examples/jsm/objects/Box3Helper.js';
 
 export class Viewer {
@@ -36,14 +36,14 @@ export class Viewer {
 		const canvas = document.createElement('canvas');
 		canvas.width = el.clientWidth * window.devicePixelRatio;
 		canvas.height = el.clientHeight * window.devicePixelRatio;
-		canvas.style.width = el.clientWidth + "px";
-		canvas.style.height = el.clientHeight + "px";
+		canvas.style.width = el.clientWidth + 'px';
+		canvas.style.height = el.clientHeight + 'px';
 		this.el.appendChild(canvas);
 
 		const width = canvas.clientWidth || 2;
 		const height = canvas.clientHeight || 2;
 
-		const gl = canvas.getContext("webgl2", {
+		const gl = canvas.getContext('webgl2', {
 			antialias: true,
 			alpha: false,
 			stencil: true
@@ -141,14 +141,14 @@ export class Viewer {
 
 		const lensflareMarker = new LensflareMarker();
 		lensflareMarker.occlusionScale = 0.1;
-		const textureFlare0 = textureLoader.load("./textures/lensflare/lensflare0.png");
-		const textureFlare3 = textureLoader.load("./textures/lensflare/lensflare3.png");
+		const textureFlare0 = textureLoader.load('./textures/lensflare/lensflare0.png');
+		const textureFlare3 = textureLoader.load('./textures/lensflare/lensflare3.png');
 		lensflareMarker.lensflareElements = [
 			{ texture: textureFlare0, color: new Color3(0.2, 0.2, 0.2), scale: 0.6, offset: 0 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.05, offset: 0.6 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 0.7 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.1, offset: 0.9 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 1 },
+			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 1 }
 		];
 		lensflareMarker.visible = false;
 		directionalLight.add(lensflareMarker);
@@ -160,7 +160,7 @@ export class Viewer {
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.05, offset: 0.6 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 0.7 },
 			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.1, offset: 0.9 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 1 },
+			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 1 }
 		];
 		lensflareMarker2.visible = false;
 		directionalLight2.add(lensflareMarker2);
@@ -219,7 +219,7 @@ export class Viewer {
 		this._cameraDefaultView = {
 			start: [60, 10, 8],
 			to: [80, 45, 2.6]
-		}
+		};
 		this._cameraTween = null;
 
 		this._raycaster = new Raycaster();
@@ -309,11 +309,13 @@ export class Viewer {
 
 	resize() {
 		const { clientHeight, clientWidth } = this.el;
-		this._canvas.style.width = clientWidth + "px";
-		this._canvas.style.height = clientHeight + "px";
+		this._canvas.style.width = clientWidth + 'px';
+		this._canvas.style.height = clientHeight + 'px';
 
 		const width = this._canvas.clientWidth || 2;
 		const height = this._canvas.clientHeight || 2;
+
+		const aspect = height / width;
 
 		if (this._cameraDefault === 'perspective') {
 			this._camera.setPerspective(this._fov / 180 * Math.PI, width / height, this._cameraClip.near, this._cameraClip.far);
@@ -394,7 +396,7 @@ export class Viewer {
 							node.material.wireframe = this._wireframe || false;
 							const emissive = node.material.emissive;
 							if (emissive.r + emissive.g + emissive.b > 0.0) {
-								node.effects = { 'Glow': 1 }
+								node.effects = { 'Glow': 1 };
 							}
 							if (node.material.type === 'basic') {
 								// remove envMap effect for basic material
@@ -449,10 +451,10 @@ export class Viewer {
 		clips.forEach(clip => {
 			const action = this.actions = new AnimationAction(clip);
 			this.animations.addAction(action);
-		})
+		});
 		this.actions = this.animations.getActions();
 
-		let actionIndex = 0;
+		const actionIndex = 0;
 
 		this.actions[actionIndex].time = 0;
 		this.actions[actionIndex].weight = 1;
@@ -524,7 +526,7 @@ export class Viewer {
 
 	setEnvironmentTextureByURL(url) {
 		return this._rgbeLoader.loadAsync(url).then(textureData => {
-			let texture = new Texture2D();
+			const texture = new Texture2D();
 			texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
 			texture.type = textureData.type;
 			if (textureData.magFilter !== undefined) {
@@ -624,7 +626,7 @@ export class Viewer {
 			this._cameraDefault = 'othographic';
 		}
 
-		let encoding = ColorSpaceType[options.outputEncoding] || TEXEL_ENCODING_TYPE.LINEAR;
+		const encoding = ColorSpaceType[options.outputEncoding] || TEXEL_ENCODING_TYPE.LINEAR;
 		this._camera.outputEncoding = encoding;
 		this._effectComposer.getBuffer('SceneBuffer').setOutputEncoding(encoding);
 
@@ -709,7 +711,7 @@ export class Viewer {
 		}
 
 		if (options.target) {
-			this._cameraControl.target =  new Vector3().fromArray(options.target);
+			this._cameraControl.target = new Vector3().fromArray(options.target);
 		}
 
 		this._dirty = true;
@@ -837,7 +839,7 @@ function getBoundingBox(object, target) {
 						_childBox.applyMatrix4(rootbone.worldMatrix);
 						target.expandByBox3(_childBox);
 					}
-				})
+				});
 			} else if (node.morphTargetInfluences) {
 				morphTransform(node, _childBox, _pos);
 				_childBox.applyMatrix4(node.worldMatrix);
@@ -896,10 +898,10 @@ const _temp = new Vector3();
 
 function morphTransform(node, childBox, pos) {
 	const index = node.geometry.index.buffer.array;
-	const position = node.geometry.getAttribute("a_Position");
+	const position = node.geometry.getAttribute('a_Position');
 	childBox.makeEmpty();
 	for (let i = 0; i < index.length; i += 1) {
-		const a =  index[i];
+		const a = index[i];
 		pos.fromArray(position.buffer.array, a * 3);
 		morphNodeTransform(node, a, pos);
 		childBox.expandByPoint(pos);

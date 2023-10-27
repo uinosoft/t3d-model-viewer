@@ -98,7 +98,7 @@ export class UIControl {
 		directional2Folder.add(options.light.directional.directional2, 'lensflare');
 
 		const cameraDirectional = lightFolder.addFolder('Camera Directional Light').onChange(() => {
-			viewer.setDirectionalLight(options.light.directional.cameraDirectional, 0)
+			viewer.setDirectionalLight(options.light.directional.cameraDirectional, 0);
 		});
 		cameraDirectional.add(options.light.directional.cameraDirectional, 'intensity', 0, MAX_DIR_LIGHT_INTENSITY, 0.001);
 		cameraDirectional.addColor(options.light.directional.cameraDirectional, 'color');
@@ -207,17 +207,17 @@ export class UIControl {
 
 		const dofEffectControls = {
 			pickFocus: () => {
-				const body = document.querySelector("body");
-				body.style.cursor = "crosshair";
+				const body = document.querySelector('body');
+				body.style.cursor = 'crosshair';
 				viewer._canvas.onmousedown = function(event) {
 					const intersect = viewer.pickModel(event);
 					if (intersect) {
 						intersect.point.toArray(options.postEffect.dof.focalTarget);
 						viewer.updateFocalTarget(options.postEffect.dof.focalTarget);
 					}
-					body.style.cursor = "default";
+					body.style.cursor = 'default';
 					viewer._canvas.onmousedown = null;
-				}
+				};
 			}
 		};
 		dofEffectFolder.add(dofEffectControls, 'pickFocus');
@@ -261,7 +261,7 @@ export class UIControl {
 			viewer.updateCameraView(_options.cameraView);
 
 			updateOptions(_options);
-		}
+		};
 
 		const fileControls = {
 			import: () => {
@@ -273,7 +273,7 @@ export class UIControl {
 				viewer.exportCameraView(options);
 				exportFileJSON(options);
 			}
-		}
+		};
 
 		const fileFolder = gui.addFolder('File');
 		fileFolder.add(fileControls, 'import');
@@ -310,7 +310,7 @@ export class UIControl {
 			} else {
 				animationFolder.hide();
 			}
-		}
+		};
 
 		function getDOFFocalLength(radius) {
 			const diagonal = radius * 2;
@@ -345,7 +345,7 @@ export class UIControl {
 				.setValue(options.postEffect.dof.focalLength)
 				.max(focalLength * 2)
 				.updateDisplay();
-		}
+		};
 
 		function updateOptions(options) {
 			gui.children[0].children[0].setValue(options.global.wireframe);
@@ -481,7 +481,7 @@ export class UIControl {
 
 		this.toggleHidden = function() {
 			gui.show(gui._hidden);
-		}
+		};
 	}
 
 }

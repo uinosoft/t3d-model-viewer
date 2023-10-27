@@ -1,4 +1,5 @@
 export const GroundShader = {
+	name: 'GroundShader',
 
 	uniforms: {
 		size: 30,
@@ -88,5 +89,4 @@ export const GroundShader = {
 		}
 
 	`
-
-}
+};

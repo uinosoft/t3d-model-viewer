@@ -1,8 +1,8 @@
-import { Viewer } from "./Viewer.js";
-import { UIControl } from "./UIControl.js";
-import { Validator } from "./Validator.js";
-import { SimpleDropzone } from "simple-dropzone";
-import modelList from "./configs/models.json";
+import { Viewer } from './Viewer.js';
+import { UIControl } from './UIControl.js';
+import { Validator } from './Validator.js';
+import { SimpleDropzone } from 'simple-dropzone';
+import modelList from './configs/models.json';
 
 export class App {
 
@@ -14,40 +14,40 @@ export class App {
 		this.uiCtrl = null;
 		this.validator = new Validator(el);
 
-		this.dropEl = document.querySelector(".dropzone");
-		this.inputEl = document.querySelector("#file-input");
-		this.spinnerEl = el.querySelector(".spinner");
-		this.headerEl = document.querySelector(".header");
+		this.dropEl = document.querySelector('.dropzone');
+		this.inputEl = document.querySelector('#file-input');
+		this.spinnerEl = el.querySelector('.spinner');
+		this.headerEl = document.querySelector('.header');
 
 		const dropzone = new SimpleDropzone(this.dropEl, this.inputEl);
-		dropzone.on("drop", ({ files }) => {
+		dropzone.on('drop', ({ files }) => {
 			let root = findRoot(files, /\.(gltf|glb)$/);
 
 			if (root) {
 				this.view(root.file, root.path, files);
 			} else {
 				if (this.viewer) {
-					if (root = findRoot(files, /\.json/)) {
+					if (root = findRoot(files, /\.json/)) { // eslint-disable-line no-cond-assign
 						this.viewConfig(root.file, root.path, files);
-					} else if (root = findRoot(files, /\.(hdr)/)) {
-						const fileURL = typeof root.file === "string" ? root.file : URL.createObjectURL(root.file);
+					} else if (root = findRoot(files, /\.(hdr)/)) { // eslint-disable-line no-cond-assign
+						const fileURL = typeof root.file === 'string' ? root.file : URL.createObjectURL(root.file);
 						this.viewer.setEnvironmentTextureByURL(fileURL)
 							.catch(e => onError(e))
 							.finally(() => {
 								this.hideSpinner();
 							});
 					} else {
-						onError("No usable asset found.");
+						onError('No usable asset found.');
 						this.hideSpinner();
 					}
 				} else {
-					onError("Need to load the model first, but no .gltf or .glb asset found.");
+					onError('Need to load the model first, but no .gltf or .glb asset found.');
 					this.hideSpinner();
 				}
 			}
 		});
-		dropzone.on("dropstart", () => this.showSpinner());
-		dropzone.on("droperror", () => this.hideSpinner());
+		dropzone.on('dropstart', () => this.showSpinner());
+		dropzone.on('droperror', () => this.hideSpinner());
 
 		this.hideSpinner();
 
@@ -56,37 +56,37 @@ export class App {
 			document.querySelector(`#model-${name}`).onclick = () => {
 				this.showSpinner();
 				this.view(`./models/${uri}`);
-			}
+			};
 		}
 
 		// Press F8 to toggle UI
-		document.addEventListener("keydown", e => {
-			if (e.key === "F8" && this.uiCtrl !== null) {
-				this.headerEl.style.display = this.headerEl.style.display === "none" ? "" : "none";
+		document.addEventListener('keydown', e => {
+			if (e.key === 'F8' && this.uiCtrl !== null) {
+				this.headerEl.style.display = this.headerEl.style.display === 'none' ? '' : 'none';
 				this.uiCtrl.toggleHidden();
 				this.viewer.resize();
 			}
 		});
 
 		// Resize viewer on window resize
-		window.addEventListener("resize", () => {
+		window.addEventListener('resize', () => {
 			this.viewer && this.viewer.resize();
 		}, true);
 	}
 
 	showSpinner() {
-		this.spinnerEl.style.display = "";
+		this.spinnerEl.style.display = '';
 	}
 
 	hideSpinner() {
-		this.spinnerEl.style.display = "none";
+		this.spinnerEl.style.display = 'none';
 	}
 
 	view(rootFile, rootPath, fileMap) {
 		if (!this.viewer) {
-			this.viewerEl = document.createElement("div");
-			this.viewerEl.classList.add("viewer");
-			this.dropEl.innerHTML = "";
+			this.viewerEl = document.createElement('div');
+			this.viewerEl.classList.add('viewer');
+			this.dropEl.innerHTML = '';
 			this.dropEl.appendChild(this.viewerEl);
 			this.viewer = new Viewer(this.viewerEl);
 			this.viewer.startRender();
@@ -94,7 +94,7 @@ export class App {
 
 		this.viewer.clear();
 
-		const fileURL = typeof rootFile === "string" ? rootFile : URL.createObjectURL(rootFile);
+		const fileURL = typeof rootFile === 'string' ? rootFile : URL.createObjectURL(rootFile);
 
 		this.viewer
 			.load(fileURL, rootPath, fileMap)
@@ -105,18 +105,18 @@ export class App {
 				this.uiCtrl.setAnimations(gltf.animations);
 				this.validator.validate(gltf.data, fileURL, rootPath, fileMap, gltf);
 				this.hideSpinner();
-				if (typeof rootFile === "object") URL.revokeObjectURL(fileURL);
+				if (typeof rootFile === 'object') URL.revokeObjectURL(fileURL);
 			});
 	}
 
 	viewConfig(rootFile, rootPath, fileMap) {
-		if (rootFile.type !== "application/json") {
-			onError("Config file must be a JSON file.");
+		if (rootFile.type !== 'application/json') {
+			onError('Config file must be a JSON file.');
 			return;
 		}
 
 		const reader = new FileReader();
-		reader.onload = (event) => {
+		reader.onload = event => {
 			const jsonData = JSON.parse(event.target.result);
 			this.uiCtrl.importOptions(jsonData);
 			this.hideSpinner();
@@ -129,11 +129,11 @@ export class App {
 function onError(error) {
 	let message = (error || {}).message || error.toString();
 	if (message.match(/ProgressEvent/)) {
-		message = "Unable to retrieve this file. Check JS console and browser network tab.";
+		message = 'Unable to retrieve this file. Check JS console and browser network tab.';
 	} else if (message.match(/Unexpected token/)) {
 		message = `Unable to parse file content. Verify that this file is valid. Error: "${message}"`;
 	} else if (error && error.target && error.target instanceof Image) {
-		error = "Missing texture: " + error.target.src.split("/").pop();
+		error = 'Missing texture: ' + error.target.src.split('/').pop();
 	}
 	window.alert(message);
 	console.error(error);
@@ -144,7 +144,7 @@ function findRoot(files, matcher) {
 
 	Array.from(files).forEach(([uri, file]) => {
 		if (file.name.match(matcher)) {
-			const path = uri.replace(file.name, "");
+			const path = uri.replace(file.name, '');
 			result = { file, path };
 		}
 	});
@@ -152,6 +152,6 @@ function findRoot(files, matcher) {
 	return result;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
 	new App(document.body, location);
 });

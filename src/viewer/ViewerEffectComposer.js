@@ -8,7 +8,7 @@ import { LensflareDebugger } from 't3d-effect-composer/examples/jsm/lensflare/Le
 import { LensflareBuffer } from 't3d-effect-composer/examples/jsm/lensflare/LensflareBuffer.js';
 import { LensflareEffect } from 't3d-effect-composer/examples/jsm/lensflare/LensflareEffect.js';
 import SharpnessEffect from 't3d-effect-composer/examples/jsm/SharpnessEffect.js';
-import { ColorSpaceType } from '../Utils';
+import { ColorSpaceType } from '../Utils.js';
 
 export class ViewerEffectComposer extends DefaultEffectComposer {
 
@@ -17,8 +17,8 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		const options = {
 			samplerNumber: Math.min(renderer.capabilities.maxSamples, 5),
 			webgl2: true,
-			floatColorBuffer: !!renderer.capabilities.getExtension("EXT_color_buffer_float"),
-			highDynamicRange: urlParams.get('hdr') !== undefined ? !!urlParams.get('hdr') : true,
+			floatColorBuffer: !!renderer.capabilities.getExtension('EXT_color_buffer_float'),
+			highDynamicRange: urlParams.get('hdr') !== undefined ? !!urlParams.get('hdr') : true
 		};
 
 		if (options.highDynamicRange) console.info('Notice: HDR is enabled, but it is currently an experimental feature.');
@@ -231,7 +231,7 @@ const colorShader = {
 	name: 'ec_color',
 	defines: {},
 	uniforms: {
-		strength: 1,
+		strength: 1
 	},
 	vertexShader: `
         #include <common_vert>

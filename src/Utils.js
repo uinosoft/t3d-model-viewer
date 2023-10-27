@@ -6,21 +6,21 @@ function readFileJSON(ev) {
 		const fileDom = ev.target,
 			file = fileDom.files[0];
 
-		if (file.type !== "application/json") {
-			reject("Only supports uploading json file.");
+		if (file.type !== 'application/json') {
+			reject('Only supports uploading json file.');
 		}
 
-		if (typeof FileReader === "undefined") {
-			reject("FileReader not support.");
+		if (typeof FileReader === 'undefined') {
+			reject('FileReader not support.');
 		}
 
-		ev.target.value = "";
+		ev.target.value = '';
 
 		const reader = new FileReader();
 		reader.readAsText(file);
 
-		reader.onerror = (err) => {
-			reject("Data parsing failed(1).", err);
+		reader.onerror = err => {
+			reject('Data parsing failed(1).', err);
 		};
 
 		reader.onload = () => {
@@ -30,26 +30,26 @@ function readFileJSON(ev) {
 					const importData = JSON.parse(resultData);
 					resolve(importData);
 				} catch (error) {
-					reject("Data parsing failed(2).", error);
+					reject('Data parsing failed(2).', error);
 				}
 			} else {
-				reject("Data parsing failed(3)", error);
+				reject('Data parsing failed(3)', {});
 			}
 		};
 	});
 }
 
 export function exportFileJSON(data) {
-	if (typeof data === "object") {
+	if (typeof data === 'object') {
 		data = JSON.stringify(data, null, 4);
 	}
-	const blob = new Blob([data], { type: "text/json" }),
-		e = new MouseEvent("click"),
-		a = document.createElement("a");
+	const blob = new Blob([data], { type: 'text/json' }),
+		e = new MouseEvent('click'),
+		a = document.createElement('a');
 
-	a.download = "config.json";
+	a.download = 'config.json';
 	a.href = window.URL.createObjectURL(blob);
-	a.dataset.downloadurl = ["text/json", a.download, a.href].join(":");
+	a.dataset.downloadurl = ['text/json', a.download, a.href].join(':');
 	a.dispatchEvent(e);
 }
 
@@ -57,18 +57,18 @@ export function importFileJSON(callback) {
 	const inputObj = document.createElement('input');
 	inputObj.setAttribute('id', '_ef');
 	inputObj.setAttribute('type', 'file');
-	inputObj.setAttribute("style", 'visibility:hidden;height:0px');
+	inputObj.setAttribute('style', 'visibility:hidden;height:0px');
 	document.body.appendChild(inputObj);
 
 	inputObj.click();
 
-	inputObj.onchange = (event) => {
+	inputObj.onchange = event => {
 		readFileJSON(event)
-			.then((res) => {
-				console.log("import data:", res);
+			.then(res => {
+				console.log('import data:', res);
 				callback(res);
 			})
-			.catch((err) => {
+			.catch(err => {
 				console.log(err);
 			});
 	};
@@ -148,5 +148,5 @@ class JsonTools {
 export const ColorSpaceType = {
 	'SRGB': TEXEL_ENCODING_TYPE.SRGB,
 	'Gamma': TEXEL_ENCODING_TYPE.GAMMA,
-	'Linear': TEXEL_ENCODING_TYPE.LINEAR,
+	'Linear': TEXEL_ENCODING_TYPE.LINEAR
 };

@@ -57,8 +57,8 @@ export function defaultGetDistanceMaterialFn(renderable, light) {
 	}
 
 	material.side = light.shadow.flipSide ? shadowSide[renderable.material.side] : renderable.material.side;
-	material.uniforms["nearDistance"] = light.shadow.cameraNear;
-	material.uniforms["farDistance"] = light.shadow.cameraFar;
+	material.uniforms['nearDistance'] = light.shadow.cameraNear;
+	material.uniforms['farDistance'] = light.shadow.cameraFar;
 
 	material.clippingPlanes = renderable.material.clippingPlanes;
 	material.drawMode = renderable.material.drawMode;
@@ -69,4 +69,4 @@ export function defaultGetDistanceMaterialFn(renderable, light) {
 const depthMaterials = {};
 const distanceMaterials = {};
 
-const shadowSide = { "front": DRAW_SIDE.BACK, "back": DRAW_SIDE.FRONT, "double": DRAW_SIDE.DOUBLE };
+const shadowSide = { 'front': DRAW_SIDE.BACK, 'back': DRAW_SIDE.FRONT, 'double': DRAW_SIDE.DOUBLE };

@@ -21,10 +21,10 @@ export class Validator {
 
 	validate(data, fileURL, rootPath, fileMap, response) {
 		validateBytes(new Uint8Array(data), {
-			externalResourceFunction: (uri) =>
+			externalResourceFunction: uri =>
 				this.resolveExternalResource(uri, fileURL, rootPath, fileMap) })
-			.then((report) => this.setReport(report, response))
-			.catch((e) => this.setReportException(e));
+			.then(report => this.setReport(report, response))
+			.catch(e => this.setReportException(e));
 	}
 
 	resolveExternalResource(uri, rootFile, rootPath, assetMap) {
@@ -32,8 +32,8 @@ export class Validator {
 		const normalizedURL =
 			rootPath +
 			decodeURI(uri) // validator applies URI encoding.
-				.replace(baseURL, "")
-				.replace(/^(\.?\/)/, "");
+				.replace(baseURL, '')
+				.replace(/^(\.?\/)/, '');
 
 		let objectURL;
 
@@ -43,8 +43,8 @@ export class Validator {
 		}
 
 		return fetch(objectURL || baseURL + uri)
-			.then((response) => response.arrayBuffer())
-			.then((buffer) => {
+			.then(response => response.arrayBuffer())
+			.then(buffer => {
 				if (objectURL) URL.revokeObjectURL(objectURL);
 				return new Uint8Array(buffer);
 			});
@@ -53,7 +53,7 @@ export class Validator {
 	setReport(report, response) {
 		const generatorID = report && report.info && report.info.generator || '';
 		const generator = registry.generators
-			.find((tool) => {
+			.find(tool => {
 				if (tool.generator.indexOf('*') === -1) {
 					return tool.generator === generatorID;
 				}
@@ -72,10 +72,10 @@ export class Validator {
 				report.issues.maxSeverity = index;
 			}
 		});
-		report.errors = report.issues.messages.filter((msg) => msg.severity === 0);
-		report.warnings = report.issues.messages.filter((msg) => msg.severity === 1);
-		report.infos = report.issues.messages.filter((msg) => msg.severity === 2);
-		report.hints = report.issues.messages.filter((msg) => msg.severity === 3);
+		report.errors = report.issues.messages.filter(msg => msg.severity === 0);
+		report.warnings = report.issues.messages.filter(msg => msg.severity === 1);
+		report.infos = report.issues.messages.filter(msg => msg.severity === 2);
+		report.hints = report.issues.messages.filter(msg => msg.severity === 3);
 		groupMessages(report);
 		this.report = report;
 
@@ -97,20 +97,20 @@ export class Validator {
 				}
 			};
 
-			report.errors.forEach((message) => {
+			report.errors.forEach(message => {
 				if (!CODES[message.code]) return;
 				if (!CODES[message.code].pointerCounts[message.pointer]) {
 					CODES[message.code].pointerCounts[message.pointer] = 0;
 				}
 				CODES[message.code].pointerCounts[message.pointer]++;
 			});
-			report.errors = report.errors.filter((message) => {
+			report.errors = report.errors.filter(message => {
 				if (!CODES[message.code]) return true;
 				if (!CODES[message.code].pointerCounts[message.pointer]) return true;
 				return CODES[message.code].pointerCounts[message.pointer] < 2;
 			});
-			Object.keys(CODES).forEach((code) => {
-				Object.keys(CODES[code].pointerCounts).forEach((pointer) => {
+			Object.keys(CODES).forEach(code => {
+				Object.keys(CODES[code].pointerCounts).forEach(pointer => {
 					report.errors.push({
 						code: code,
 						pointer: pointer,
@@ -156,7 +156,7 @@ export class Validator {
 		reportToggleBtn.addEventListener('click', () => this.showLightbox());
 
 		const reportToggleCloseBtn = this.toggleEl.querySelector('.report-toggle-close');
-		reportToggleCloseBtn.addEventListener('click', (e) => {
+		reportToggleCloseBtn.addEventListener('click', e => {
 			this.hideToggle();
 			e.stopPropagation();
 		});
@@ -188,7 +188,9 @@ function escapeHTML(unsafe) {
 }
 
 function linkify(text) {
+	// eslint-disable-next-line no-useless-escape
 	const urlPattern = /\b(?:https?):\/\/[a-z0-9-+&@#\/%?=~_|!:,.;]*[a-z0-9-+&@#\/%=~_|]/gim;
+	// eslint-disable-next-line no-useless-escape
 	const emailAddressPattern = /(([a-zA-Z0-9_\-\.]+)@[a-zA-Z_]+?(?:\.[a-zA-Z]{2,6}))+/gim;
 	return text
 		.replace(urlPattern, '<a target="_blank" href="$&">$&</a>')
