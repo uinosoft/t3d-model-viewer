@@ -27,9 +27,15 @@ export class App {
 				this.view(root.file, root.path, files);
 			} else {
 				if (this.viewer) {
-					root = findRoot(files, /\.json/);
-					if (root) {
+					if (root = findRoot(files, /\.json/)) {
 						this.viewConfig(root.file, root.path, files);
+					} else if (root = findRoot(files, /\.(hdr)/)) {
+						const fileURL = typeof root.file === "string" ? root.file : URL.createObjectURL(root.file);
+						this.viewer.setEnvironmentTextureByURL(fileURL)
+							.catch(e => onError(e))
+							.finally(() => {
+								this.hideSpinner();
+							});
 					} else {
 						onError("No usable asset found.");
 						this.hideSpinner();

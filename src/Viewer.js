@@ -516,33 +516,39 @@ export class Viewer {
 			this._skyBox.texture = tex;
 			this._dirty = true;
 		} else {
-			this._rgbeLoader.loadAsync(`./textures/${name}.${ext}`).then(textureData => {
-				let texture = new Texture2D();
-				texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
-				texture.type = textureData.type;
-				if (textureData.magFilter !== undefined) {
-					texture.magFilter = textureData.magFilter;
-				}
-				if (textureData.minFilter !== undefined) {
-					texture.minFilter = textureData.minFilter;
-				}
-				if (textureData.generateMipmaps !== undefined) {
-					texture.generateMipmaps = textureData.generateMipmaps;
-				}
-				return texture;
-			}).then(texture => {
-				return PMREM.prefilterEnvironmentMap(this._renderer, texture, {
-					sampleSize: 1024
-				});
-			}).then(texture => {
+			this.setEnvironmentTextureByURL(`./textures/${name}.${ext}`).then(texture => {
 				environmentMap[key].tex = texture;
-
-				this._scene.environment = texture;
-				this._skyBox.texture = texture;
-
-				this._dirty = true;
 			});
 		}
+	}
+
+	setEnvironmentTextureByURL(url) {
+		return this._rgbeLoader.loadAsync(url).then(textureData => {
+			let texture = new Texture2D();
+			texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
+			texture.type = textureData.type;
+			if (textureData.magFilter !== undefined) {
+				texture.magFilter = textureData.magFilter;
+			}
+			if (textureData.minFilter !== undefined) {
+				texture.minFilter = textureData.minFilter;
+			}
+			if (textureData.generateMipmaps !== undefined) {
+				texture.generateMipmaps = textureData.generateMipmaps;
+			}
+			return texture;
+		}).then(texture => {
+			return PMREM.prefilterEnvironmentMap(this._renderer, texture, {
+				sampleSize: 1024
+			});
+		}).then(texture => {
+			this._scene.environment = texture;
+			this._skyBox.texture = texture;
+
+			this._dirty = true;
+
+			return texture;
+		});
 	}
 
 	setEnvironmentParams(options) {

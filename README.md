@@ -10,11 +10,12 @@ Powered by:
 
 ## Features
 
-* Preview models - Just drag the model files into the viewer page.
-* Powerful effects - You can adjust the lighting, background, and post-processing of the preview environment.
-* Configuration import and export - Export through UI Button, drag in json file to import.
-* UI display switching - Press `F8`, make it easier to take screenshots.
+* Preview models - Simply drag model files onto the viewer page.
+* Powerful effects - Adjust lighting, background, and post-processing of the preview environment.
+* Configuration import and export - Export via UI button, import by dragging in a JSON file.
+* UI display switching - Press F8 to make taking screenshots easier.
 * (experimental) HDR Rendering - Visit [T3D Model Viewer (HDR)](https://uinosoft.github.io/t3d-model-viewer/?hdr=1) to experience the HDR rendering pipeline.
+* Preview HDR environment textures - Drag `.hdr` files onto the viewer page while previewing a model.
 
 ## Screenshots
 
