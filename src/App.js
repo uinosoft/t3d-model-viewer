@@ -29,9 +29,10 @@ export class App {
 				if (this.viewer) {
 					if (root = findRoot(files, /\.json/)) { // eslint-disable-line no-cond-assign
 						this.viewConfig(root.file, root.path, files);
-					} else if (root = findRoot(files, /\.(hdr)/)) { // eslint-disable-line no-cond-assign
+					} else if (root = findRoot(files, /\.(hdr|exr)$/)) { // eslint-disable-line no-cond-assign
 						const fileURL = typeof root.file === 'string' ? root.file : URL.createObjectURL(root.file);
-						this.viewer.setEnvironmentTextureByURL(fileURL)
+						const isEXR = root.file.name && root.file.name.endsWith && root.file.name.endsWith('.exr');
+						this.viewer.setEnvironmentTextureByURL(fileURL, isEXR)
 							.catch(e => onError(e))
 							.finally(() => {
 								this.hideSpinner();

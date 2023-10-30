@@ -15,7 +15,7 @@ Powered by:
 * Configuration import and export - Export via UI button, import by dragging in a JSON file.
 * UI display switching - Press F8 to make taking screenshots easier.
 * (experimental) HDR Rendering - Visit [T3D Model Viewer (HDR)](https://uinosoft.github.io/t3d-model-viewer/?hdr=1) to experience the HDR rendering pipeline.
-* Preview HDR environment textures - Drag `.hdr` files onto the viewer page while previewing a model.
+* Preview HDR environment textures - Drag `.hdr` or `.exr` files onto the viewer page while previewing a model.
 
 ## Screenshots
 

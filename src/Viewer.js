@@ -8,6 +8,7 @@ import { DRACOLoader } from 't3d/examples/jsm/loaders/DRACOLoader.js';
 import { KTX2Loader } from 't3d/examples/jsm/loaders/KTX2Loader.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
 import { RGBELoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
+import { EXRLoader } from 't3d/examples/jsm/loaders/EXRLoader.js';
 import { PMREM } from 't3d/examples/jsm/PMREM.js';
 import { Clock } from 't3d/examples/jsm/Clock.js';
 import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
@@ -24,6 +25,7 @@ import { ShadowAdapter } from 't3d/examples/jsm/math/ShadowAdapter.js';
 import { default as TWEEN } from '@tweenjs/tween.js';
 import { ColorSpaceType } from './Utils.js';
 import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache.js';
+import * as fflate from 'fflate';
 // import { Box3Helper } from 't3d/examples/jsm/objects/Box3Helper.js';
 
 export class Viewer {
@@ -168,8 +170,11 @@ export class Viewer {
 		camera.gammaFactor = 2.0;
 		camera.outputEncoding = TEXEL_ENCODING_TYPE.SRGB;
 
+		EXRLoader.setfflate(fflate);
+
 		this._textureLoader = textureLoader;
 		this._rgbeLoader = new RGBELoader();
+		this._exrLoader = new EXRLoader();
 
 		this.setEnvironmentTexture('Ice_Lake');
 
@@ -524,11 +529,13 @@ export class Viewer {
 		}
 	}
 
-	setEnvironmentTextureByURL(url) {
-		return this._rgbeLoader.loadAsync(url).then(textureData => {
+	setEnvironmentTextureByURL(url, isEXR = false) {
+		const loader = isEXR ? this._exrLoader : this._rgbeLoader;
+		return loader.loadAsync(url).then(textureData => {
 			const texture = new Texture2D();
 			texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
 			texture.type = textureData.type;
+			texture.flipY = textureData.flipY;
 			if (textureData.magFilter !== undefined) {
 				texture.magFilter = textureData.magFilter;
 			}
