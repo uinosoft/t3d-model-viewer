@@ -4,6 +4,7 @@ import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderT
 import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
 import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
+import { EXT_mesh_gpu_instancing } from 't3d/addons/loaders/glTF/extensions/EXT_mesh_gpu_instancing.js';
 import { DRACOLoader } from 't3d/examples/jsm/loaders/DRACOLoader.js';
 import { KTX2Loader } from 't3d/examples/jsm/loaders/KTX2Loader.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
@@ -376,6 +377,8 @@ export class Viewer {
 			const loader = new GLTFLoader(manager);
 			loader.replaceParser(IndexParser, 0);
 			loader.setDRACOLoader(dracoLoader);
+
+			loader.extensions.set('EXT_mesh_gpu_instancing', EXT_mesh_gpu_instancing);
 
 			const zstdDecoder = new ZSTDDecoder().init();
 			KTX2Loader.setKTXParser(KTXParse).setZSTDDecoder(zstdDecoder);
