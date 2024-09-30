@@ -1,5 +1,5 @@
 import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
-	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Texture2D, Color3, TEXEL_ENCODING_TYPE,
+	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Color3, TEXEL_ENCODING_TYPE,
 	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
 import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
@@ -7,8 +7,8 @@ import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
 import { DRACOLoader } from 't3d/examples/jsm/loaders/DRACOLoader.js';
 import { KTX2Loader } from 't3d/examples/jsm/loaders/KTX2Loader.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
-import { RGBELoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
-import { EXRLoader } from 't3d/examples/jsm/loaders/EXRLoader.js';
+import { RGBETexture2DLoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
+import { EXRTexture2DLoader } from 't3d/examples/jsm/loaders/EXRLoader.js';
 import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
 import { Timer } from 't3d/examples/jsm/misc/Timer.js';
 import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
@@ -170,11 +170,12 @@ export class Viewer {
 		camera.gammaFactor = 2.0;
 		camera.outputEncoding = TEXEL_ENCODING_TYPE.SRGB;
 
-		EXRLoader.setfflate(fflate);
+		EXRTexture2DLoader.setfflate(fflate);
 
 		this._textureLoader = textureLoader;
-		this._rgbeLoader = new RGBELoader();
-		this._exrLoader = new EXRLoader();
+
+		this._rgbeTextureLoader = new RGBETexture2DLoader();
+		this._exrTextureLoader = new EXRTexture2DLoader();
 
 		this._pmremGenerator = new PMREMGenerator(1024);
 
@@ -534,23 +535,8 @@ export class Viewer {
 	}
 
 	setEnvironmentTextureByURL(url, isEXR = false) {
-		const loader = isEXR ? this._exrLoader : this._rgbeLoader;
-		return loader.loadAsync(url).then(textureData => {
-			const texture = new Texture2D();
-			texture.image = { data: textureData.data, width: textureData.width, height: textureData.height };
-			texture.type = textureData.type;
-			texture.flipY = textureData.flipY;
-			if (textureData.magFilter !== undefined) {
-				texture.magFilter = textureData.magFilter;
-			}
-			if (textureData.minFilter !== undefined) {
-				texture.minFilter = textureData.minFilter;
-			}
-			if (textureData.generateMipmaps !== undefined) {
-				texture.generateMipmaps = textureData.generateMipmaps;
-			}
-			return texture;
-		}).then(texture => {
+		const loader = isEXR ? this._exrTextureLoader : this._rgbeTextureLoader;
+		return loader.loadAsync(url).then(texture => {
 			return this._pmremGenerator.prefilter(this._renderer, texture);
 		}).then(texture => {
 			this._scene.environment = texture;
