@@ -14,8 +14,8 @@ Powered by:
 * Powerful effects - Adjust the lighting, background, and post-processing of the preview environment.
 * Configuration import and export - Export via the UI button, import by dragging in a JSON file.
 * UI display switching - Press `F8` to make taking screenshots easier.
-* HDR rendering - Use the `R11G11B10` format color buffer by default.
 * Preview HDR environment textures - Drag `.hdr` or `.exr` files onto the viewer page while previewing a model.
+* (experimental) HDR Rendering - Visit [T3D Model Viewer (HDR)](https://uinosoft.github.io/t3d-model-viewer/?hdr=1) to experience the HDR rendering pipeline.
 
 ## Screenshots
 
