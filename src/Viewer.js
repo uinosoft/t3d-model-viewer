@@ -9,8 +9,8 @@ import { KTX2Loader } from 't3d/examples/jsm/loaders/KTX2Loader.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
 import { RGBELoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
 import { EXRLoader } from 't3d/examples/jsm/loaders/EXRLoader.js';
-import { PMREM } from 't3d/examples/jsm/PMREM.js';
-import { Clock } from 't3d/examples/jsm/Clock.js';
+import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
+import { Timer } from 't3d/examples/jsm/misc/Timer.js';
 import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
 import environmentMap from './configs/environments.json';
 import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
@@ -54,7 +54,7 @@ export class Viewer {
 		const renderer = new WebGLRenderer(gl);
 		renderer.setClearColor(0.2, 0.2, 0.2, 1);
 
-		this.clock = new Clock();
+		this.timer = new Timer();
 
 		const backRenderTarget = new RenderTargetBack(canvas);
 		backRenderTarget.resize(width, height);
@@ -176,6 +176,8 @@ export class Viewer {
 		this._rgbeLoader = new RGBELoader();
 		this._exrLoader = new EXRLoader();
 
+		this._pmremGenerator = new PMREMGenerator(1024);
+
 		this.setEnvironmentTexture('Ice_Lake');
 
 		// this._pixelRatio = pixelRatio;
@@ -256,7 +258,7 @@ export class Viewer {
 		}
 	}
 
-	tick(timeStamp) {
+	tick(timestamp) {
 		TWEEN.update();
 
 		let renderDirty = this._cameraControl.update() || this._dirty;
@@ -265,10 +267,12 @@ export class Viewer {
 		this._scene.updateRenderStates(this._camera);
 		this._scene.updateRenderQueue(this._camera);
 
+		this.timer.update(timestamp);
+
 		this._shadowMapPass.render(this._renderer, this._scene);
 
 		if (this.animations) {
-			this.animations.update(this.clock.getDelta() * this.timeScale);
+			this.animations.update(this.timer.getDelta() * this.timeScale);
 			if (hasRunningAction(this.animations.getActions())) {
 				renderDirty = true;
 			}
@@ -547,9 +551,7 @@ export class Viewer {
 			}
 			return texture;
 		}).then(texture => {
-			return PMREM.prefilterEnvironmentMap(this._renderer, texture, {
-				sampleSize: 1024
-			});
+			return this._pmremGenerator.prefilter(this._renderer, texture);
 		}).then(texture => {
 			this._scene.environment = texture;
 			this._skyBox.texture = texture;

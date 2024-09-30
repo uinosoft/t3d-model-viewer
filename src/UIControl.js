@@ -145,7 +145,7 @@ export class UIControl {
 		ssrEffectFolder.add(options.postEffect.ssr, 'pixelStrideZCutoff', 1, 300, 0.01);
 		ssrEffectFolder.add(options.postEffect.ssr, 'minGlossiness', 0, 1, 0.01);
 		ssrEffectFolder.add(options.postEffect.ssr, 'strength', 0, 1.5, 0.01);
-		ssrEffectFolder.add(options.postEffect.ssr, 'mixType', [0, 1]);
+		ssrEffectFolder.add(options.postEffect.ssr, 'falloff', 0, 1, 0.01);
 
 		const dofEffectFolder = effectFolder.addFolder('DOF');
 		dofEffectFolder.add(options.postEffect.dof, 'active');
@@ -426,7 +426,7 @@ export class UIControl {
 			gui.children[5].children[4].children[6].setValue(options.postEffect.ssr.pixelStrideZCutoff);
 			gui.children[5].children[4].children[7].setValue(options.postEffect.ssr.minGlossiness);
 			gui.children[5].children[4].children[8].setValue(options.postEffect.ssr.strength);
-			gui.children[5].children[4].children[9].setValue(options.postEffect.ssr.mixType);
+			gui.children[5].children[4].children[9].setValue(options.postEffect.ssr.falloff);
 
 			gui.children[5].children[5].children[0].setValue(options.postEffect.dof.active);
 			gui.children[5].children[5].children[1].setValue(options.postEffect.dof.focalLength);

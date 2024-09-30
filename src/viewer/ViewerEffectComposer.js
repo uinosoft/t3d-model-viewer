@@ -1,7 +1,7 @@
 import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
 import { GeometryUtils } from 't3d/examples/jsm/geometries/GeometryUtils.js';
 import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
-import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
+import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, HDRMode, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
 import { UVBuffer } from 't3d-effect-composer/examples/jsm/uv/UVBuffer.js';
 import { UVDebugger } from 't3d-effect-composer/examples/jsm/uv/UVDebugger.js';
 import { LensflareDebugger } from 't3d-effect-composer/examples/jsm/lensflare/LensflareDebugger.js';
@@ -13,15 +13,12 @@ import { ColorSpaceType } from '../Utils.js';
 export class ViewerEffectComposer extends DefaultEffectComposer {
 
 	constructor(width, height, renderer) {
-		const urlParams = new URLSearchParams(window.location.search);
 		const options = {
 			samplerNumber: Math.min(renderer.capabilities.maxSamples, 5),
 			webgl2: true,
-			floatColorBuffer: !!renderer.capabilities.getExtension('EXT_color_buffer_float'),
-			highDynamicRange: urlParams.get('hdr') !== undefined ? !!urlParams.get('hdr') : true
+			highDynamicRange: true,
+			hdrMode: HDRMode.R11G11B10
 		};
-
-		if (options.highDynamicRange) console.info('Notice: HDR is enabled, but it is currently an experimental feature.');
 
 		super(width, height, options);
 
@@ -238,9 +235,11 @@ const colorShader = {
         #include <morphtarget_pars_vert>
         #include <skinning_pars_vert>
         #include <uv_pars_vert>
+		#include <diffuseMap_pars_vert>
 		#include <logdepthbuf_pars_vert>
         void main() {
         	#include <uv_vert>
+			#include <diffuseMap_vert>
         	#include <begin_vert>
         	#include <morphtarget_vert>
         	#include <skinning_vert>
@@ -251,6 +250,7 @@ const colorShader = {
 	fragmentShader: `
         #include <common_frag>
         #include <diffuseMap_pars_frag>
+		#include <alphaTest_pars_frag>
 
         #include <uv_pars_frag>
 
@@ -266,11 +266,11 @@ const colorShader = {
 			vec4 outColor = vec4(u_Color, u_Opacity);
 
 			#ifdef USE_DIFFUSE_MAP
-				outColor *= texture2D(diffuseMap, v_Uv);
+				outColor *= texture2D(diffuseMap, vDiffuseMapUV);
 			#endif
 
 			#ifdef ALPHATEST
-				if(outColor.a < ALPHATEST) discard;
+				if(outColor.a < u_AlphaTest) discard;
 			#endif
 
 			outColor.a *= strength;
