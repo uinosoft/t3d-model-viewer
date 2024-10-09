@@ -1,40 +1,32 @@
 import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
 	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Color3, TEXEL_ENCODING_TYPE,
 	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
-import { OrbitControls } from 't3d/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 't3d/examples/jsm/loaders/glTF/GLTFLoader.js';
-import { GLTFUtils } from 't3d/examples/jsm/loaders/glTF/GLTFUtils.js';
-import { EXT_mesh_gpu_instancing } from 't3d/addons/loaders/glTF/extensions/EXT_mesh_gpu_instancing.js';
-import { DRACOLoader } from 't3d/examples/jsm/loaders/DRACOLoader.js';
-import { KTX2Loader } from 't3d/examples/jsm/loaders/KTX2Loader.js';
-import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
-import { RGBETexture2DLoader } from 't3d/examples/jsm/loaders/RGBELoader.js';
-import { EXRTexture2DLoader } from 't3d/examples/jsm/loaders/EXRLoader.js';
+import { OrbitControls } from 't3d/addons/controls/OrbitControls.js';
+import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
+import { RGBETexture2DLoader } from 't3d/addons/loaders/RGBELoader.js';
+import { EXRTexture2DLoader } from 't3d/addons/loaders/EXRLoader.js';
 import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
-import { Timer } from 't3d/examples/jsm/misc/Timer.js';
-import { SkyBox } from 't3d/examples/jsm/objects/SkyBox.js';
-import environmentMap from './configs/environments.json';
-import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
-import { LensflareMarker } from 't3d-effect-composer/examples/jsm/lensflare/LensflareMarker.js';
-import { GroundShader } from './viewer/shader/GroundShader.js';
-import Nanobar from 'nanobar';
-import { MeshoptDecoder } from './libs/meshopt_decoder.module.js';
-import * as KTXParse from './libs/ktx-parse.module.js';
-import { ZSTDDecoder } from './libs/zstddec.module.js';
-import { Raycaster } from 't3d/examples/jsm/Raycaster.js';
-import { ShadowAdapter } from 't3d/examples/jsm/math/ShadowAdapter.js';
+import { Timer } from 't3d/addons/misc/Timer.js';
+import { SkyBox } from 't3d/addons/objects/SkyBox.js';
+import { LensflareMarker } from 't3d-effect-composer/addons/lensflare/LensflareMarker.js';
+import { Raycaster } from 't3d/addons/Raycaster.js';
+import { ShadowAdapter } from 't3d/addons/math/ShadowAdapter.js';
+
 import { default as TWEEN } from '@tweenjs/tween.js';
+import Nanobar from 'nanobar';
+import * as fflate from 'fflate';
+
+import environmentMap from './configs/environments.json';
+import { GroundShader } from './viewer/shader/GroundShader.js';
+import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
 import { ColorSpaceType } from './Utils.js';
 import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache.js';
-import * as fflate from 'fflate';
-// import { Box3Helper } from 't3d/examples/jsm/objects/Box3Helper.js';
+import { GLTFModelLoader } from './loaders/GLTFModelLoader.js';
 
 export class Viewer {
 
 	constructor(el) {
 		this.el = el;
-
-		this.nanobar = new Nanobar();
 
 		const canvas = document.createElement('canvas');
 		canvas.width = el.clientWidth * window.devicePixelRatio;
@@ -170,6 +162,19 @@ export class Viewer {
 
 		camera.gammaFactor = 2.0;
 		camera.outputEncoding = TEXEL_ENCODING_TYPE.SRGB;
+
+		const nanobar = new Nanobar();
+
+		this._modelLoadManager = new LoadingManager(function() {
+			nanobar.go(100);
+			// nanobar.el.style.background = "transparent";
+		}, function(url, itemsLoaded, itemsTotal) {
+			if (itemsLoaded < itemsTotal) {
+				nanobar.go(itemsLoaded / itemsTotal * 100);
+			}
+		});
+
+		this._modelLoader = new GLTFModelLoader(this._modelLoadManager, renderer);
 
 		EXRTexture2DLoader.setfflate(fflate);
 
@@ -345,18 +350,10 @@ export class Viewer {
 
 		// Load.
 		return new Promise((resolve, reject) => {
-			const nanobar = this.nanobar;
-			// nanobar.el.style.background = "gray";
-			const manager = new LoadingManager(function() {
-				nanobar.go(100);
-				// nanobar.el.style.background = "transparent";
-			}, function(url, itemsLoaded, itemsTotal) {
-				if (itemsLoaded < itemsTotal) {
-					nanobar.go(itemsLoaded / itemsTotal * 100);
-				}
-			});
+			const blobURLs = [];
+
 			// Intercept and override relative URLs.
-			manager.setURLModifier((url, path) => {
+			this._modelLoadManager.setURLModifier((url, path) => {
 				const normalizedURL = rootPath + decodeURI(url)
 					.replace(baseURL, '')
 					.replace(/^(\.?\/)/, '');
@@ -371,26 +368,7 @@ export class Viewer {
 				return (path || '') + url;
 			});
 
-			const dracoLoader = new DRACOLoader();
-			dracoLoader.setDecoderPath('./libs/draco/');
-
-			const loader = new GLTFLoader(manager);
-			loader.replaceParser(IndexParser, 0);
-			loader.setDRACOLoader(dracoLoader);
-
-			loader.extensions.set('EXT_mesh_gpu_instancing', EXT_mesh_gpu_instancing);
-
-			const zstdDecoder = new ZSTDDecoder().init();
-			KTX2Loader.setKTXParser(KTXParse).setZSTDDecoder(zstdDecoder);
-			const ktx2Loader = new KTX2Loader()
-				.setTranscoderPath('./libs/basis/')
-				.detectSupport(this._renderer);
-			loader.setKTX2Loader(ktx2Loader);
-			loader.setMeshoptDecoder(MeshoptDecoder);
-
-			const blobURLs = [];
-
-			loader.load(url)
+			this._modelLoader.load(url)
 				.then(gltf => {
 					this._ground.visible = true;
 					this.clear();
@@ -430,10 +408,7 @@ export class Viewer {
 					root.position.x += (root.position.x - center.x);
 					root.position.y += (root.position.y - center.y);
 					root.position.z += (root.position.z - center.z);
-					getBoundingBox(root, this._boundingBox);// For models without animation
-
-					// const boxHelper = new Box3Helper(this._boundingBox);
-					// this._scene.add(boxHelper);
+					getBoundingBox(root, this._boundingBox); // For models without animation
 
 					this.setCameraState(true);
 
@@ -921,29 +896,6 @@ function morphNodeTransform(object, index, target) {
 	}
 	target.add(_morph);
 	return target;
-}
-
-class IndexParser {
-
-	static parse(context, loader) {
-		const { url } = context;
-
-		return loader.loadFile(url, 'arraybuffer').then(data => {
-			context.data = data;
-
-			const magic = GLTFUtils.decodeText(new Uint8Array(data, 0, 4));
-
-			if (magic === 'glTF') {
-				const glbData = GLTFUtils.parseGLB(data);
-				context.gltf = glbData.gltf;
-				context.buffers = glbData.buffers;
-			} else {
-				const gltfString = GLTFUtils.decodeText(new Uint8Array(data));
-				context.gltf = JSON.parse(gltfString);
-			}
-		});
-	}
-
 }
 
 function hasRunningAction(actions) {

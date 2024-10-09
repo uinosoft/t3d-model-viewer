@@ -1,13 +1,13 @@
 import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
-import { GeometryUtils } from 't3d/examples/jsm/geometries/GeometryUtils.js';
-import { Texture2DLoader } from 't3d/examples/jsm/loaders/Texture2DLoader.js';
+import { GeometryUtils } from 't3d/addons/geometries/GeometryUtils.js';
+import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
 import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
-import { UVBuffer } from 't3d-effect-composer/examples/jsm/uv/UVBuffer.js';
-import { UVDebugger } from 't3d-effect-composer/examples/jsm/uv/UVDebugger.js';
-import { LensflareDebugger } from 't3d-effect-composer/examples/jsm/lensflare/LensflareDebugger.js';
-import { LensflareBuffer } from 't3d-effect-composer/examples/jsm/lensflare/LensflareBuffer.js';
-import { LensflareEffect } from 't3d-effect-composer/examples/jsm/lensflare/LensflareEffect.js';
-import SharpnessEffect from 't3d-effect-composer/examples/jsm/SharpnessEffect.js';
+import { UVBuffer } from 't3d-effect-composer/addons/uv/UVBuffer.js';
+import { UVDebugger } from 't3d-effect-composer/addons/uv/UVDebugger.js';
+import { LensflareDebugger } from 't3d-effect-composer/addons/lensflare/LensflareDebugger.js';
+import { LensflareBuffer } from 't3d-effect-composer/addons/lensflare/LensflareBuffer.js';
+import { LensflareEffect } from 't3d-effect-composer/addons/lensflare/LensflareEffect.js';
+import SharpnessEffect from 't3d-effect-composer/addons/SharpnessEffect.js';
 import { ColorSpaceType } from '../Utils.js';
 
 export class ViewerEffectComposer extends DefaultEffectComposer {
