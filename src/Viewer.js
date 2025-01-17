@@ -1,5 +1,5 @@
 import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
-	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, Color3, TEXEL_ENCODING_TYPE,
+	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, TEXEL_ENCODING_TYPE,
 	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
 import { OrbitControls } from 't3d/addons/controls/OrbitControls.js';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
@@ -8,9 +8,7 @@ import { EXRTexture2DLoader } from 't3d/addons/loaders/EXRLoader.js';
 import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
 import { Timer } from 't3d/addons/misc/Timer.js';
 import { SkyBox } from 't3d/addons/objects/SkyBox.js';
-import { LensflareMarker } from 't3d-effect-composer/addons/lensflare/LensflareMarker.js';
 import { Raycaster } from 't3d/addons/Raycaster.js';
-import { ShadowAdapter } from 't3d/addons/math/ShadowAdapter.js';
 
 import { default as TWEEN } from '@tweenjs/tween.js';
 import Nanobar from 'nanobar';
@@ -22,6 +20,7 @@ import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEf
 import { ColorSpaceType } from './Utils.js';
 import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache.js';
 import { GLTFModelLoader } from './loaders/GLTFModelLoader.js';
+import { ViewerDirectionalLight } from './viewer/ViewerDirectionalLight.js';
 
 export class Viewer {
 
@@ -101,64 +100,21 @@ export class Viewer {
 		const ambientLight = new AmbientLight(0xffffff, 0.2);
 		scene.add(ambientLight);
 
-		const directionalLight = new DirectionalLight(0xffffff, 0.9);
-		directionalLight.castShadow = true;
-		directionalLight.shadow.flipSide = true;
-		directionalLight.shadowAdapter = false;
-		directionalLight.shadow.cameraNear = 1;
-		directionalLight.shadow.cameraFar = 20;
-		directionalLight.shadow.mapSize.set(2048, 2048);
-		directionalLight.shadow.bias = -0.004;
-		directionalLight.shadow.normalBias = 0.0;
-		directionalLight.shadow.windowSize = 30;
-		directionalLight.lookAt(new Vector3(), new Vector3(0, 1, 0));
-		scene.add(directionalLight);
-
 		const directionalLightCamera = new DirectionalLight(0xffffff, 0.2);
 		directionalLightCamera.position.set(8, 3, 8);
 		directionalLightCamera.lookAt(new Vector3(), new Vector3(0, 1, 0));
 		scene.add(directionalLightCamera);
 
-		const directionalLight2 = new DirectionalLight(0xffffff, 0);
+		const directionalLight = new ViewerDirectionalLight(0xffffff, 0.9);
+		directionalLight.castShadow = true;
+		directionalLight.shadowAdapter = false;
+		scene.add(directionalLight);
+
+		const directionalLight2 = new ViewerDirectionalLight(0xffffff, 0);
 		directionalLight2.shadowAdapter = false;
-		directionalLight2.shadow.flipSide = true;
-		directionalLight2.shadow.cameraNear = 1;
-		directionalLight2.shadow.cameraFar = 20;
-		directionalLight2.shadow.mapSize.set(2048, 2048);
-		directionalLight2.shadow.bias = -0.004;
-		directionalLight2.shadow.normalBias = 0.0;
-		directionalLight2.shadow.windowSize = 30;
-		directionalLight2.position.set(8, 3, 8);
-		directionalLight2.lookAt(new Vector3(), new Vector3(0, 1, 0));
 		scene.add(directionalLight2);
 
 		const textureLoader = new Texture2DLoader();
-
-		const lensflareMarker = new LensflareMarker();
-		lensflareMarker.occlusionScale = 0.1;
-		const textureFlare0 = textureLoader.load('./textures/lensflare/lensflare0.png');
-		const textureFlare3 = textureLoader.load('./textures/lensflare/lensflare3.png');
-		lensflareMarker.lensflareElements = [
-			{ texture: textureFlare0, color: new Color3(0.2, 0.2, 0.2), scale: 0.6, offset: 0 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.05, offset: 0.6 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 0.7 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.1, offset: 0.9 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 1 }
-		];
-		lensflareMarker.visible = false;
-		directionalLight.add(lensflareMarker);
-
-		const lensflareMarker2 = new LensflareMarker();
-		lensflareMarker2.occlusionScale = 0.1;
-		lensflareMarker2.lensflareElements = [
-			{ texture: textureFlare0, color: new Color3(0.2, 0.2, 0.2), scale: 0.6, offset: 0 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.05, offset: 0.6 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 0.7 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.1, offset: 0.9 },
-			{ texture: textureFlare3, color: new Color3(1, 1, 1), scale: 0.06, offset: 1 }
-		];
-		lensflareMarker2.visible = false;
-		directionalLight2.add(lensflareMarker2);
 
 		camera.gammaFactor = 2.0;
 		camera.outputEncoding = TEXEL_ENCODING_TYPE.SRGB;
@@ -202,8 +158,8 @@ export class Viewer {
 		this._ground = ground;
 		this._cameraControl = cameraControl;
 		this._ambientLight = ambientLight;
-		this._directionalLight = directionalLight;
 		this._directionalLightCamera = directionalLightCamera;
+		this._directionalLight = directionalLight;
 		this._directionalLight2 = directionalLight2;
 
 		this._root = null;
@@ -221,9 +177,6 @@ export class Viewer {
 		};
 		this._boundingBox = new Box3();
 		this._boundingSphere = new Sphere();
-		this._lightCoord = new Vector2(30, 40);
-		updateLightDirection(this._directionalLight, this._lightCoord, 10);
-		updateLightDirection(this._directionalLight2, this._lightCoord, 10);
 
 		this._animationFrame = null;
 		this._running = false;
@@ -288,8 +241,8 @@ export class Viewer {
 		this._directionalLightCamera.position.set(this._camera.position.x, this._camera.position.y, this._camera.position.z);
 		this._directionalLightCamera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
-		updateLightDirectionByShadowAdapter(this._directionalLight, this._camera, this._boundingBox, this._boundingSphere);
-		updateLightDirectionByShadowAdapter(this._directionalLight2, this._camera, this._boundingBox, this._boundingSphere);
+		this._directionalLight.updateDirection(this._camera, this._boundingBox, this._boundingSphere);
+		this._directionalLight2.updateDirection(this._camera, this._boundingBox, this._boundingSphere);
 
 		const focalTargetViewPos = _vec3_1.copy(this._focalTarget.position).applyMatrix4(this._camera.viewMatrix);
 		this._effectComposer.updateDOFFocalDepth(-focalTargetViewPos.z);
@@ -421,9 +374,6 @@ export class Viewer {
 					this._ground.material.uniforms.gridSize = size / 10;
 					this._ground.material.uniforms.gridSize2 = size / 50;
 
-					updateLightDirection(this._directionalLight, this._lightCoord, this._boundingSphere.radius);
-					updateLightDirection(this._directionalLight2, this._lightCoord, this._boundingSphere.radius);
-
 					this._root = root;
 					this._scene.add(root);
 					resolve(gltf);
@@ -552,8 +502,7 @@ export class Viewer {
 
 			setColor(this._directionalLight.color, options.color);
 
-			this._lightCoord = options.direction;
-			updateLightDirection(this._directionalLight, this._lightCoord, this._boundingSphere.radius);
+			this._directionalLight.setDirection(options.direction);
 
 			this._directionalLight.children[0].visible = options.lensflare;
 		}
@@ -563,8 +512,7 @@ export class Viewer {
 
 			setColor(this._directionalLight2.color, options.color);
 
-			this._lightCoord = options.direction;
-			updateLightDirection(this._directionalLight2, this._lightCoord, this._boundingSphere.radius);
+			this._directionalLight2.setDirection(options.direction);
 
 			this._directionalLight2.children[0].visible = options.lensflare;
 		}
@@ -835,33 +783,6 @@ function setBoundingSphereByBox(box, target) {
 	target.radius = diagonal.getLength() / 2;
 
 	return target;
-}
-
-function updateLightDirection(light, coord, radius) {
-	light.phi = Math.PI / 2 - coord.y * Math.PI / 180;
-	light.theta = coord.x * Math.PI / 180;
-
-	if (light.shadowAdapter) return;
-
-	const spherical = new Spherical(radius, light.phi, light.theta);
-	const position = new Vector3().setFromSpherical(spherical);
-
-	light.position.set(position.x, position.y, position.z);
-
-	light.lookAt(new Vector3(), new Vector3(0, 1, 0));
-
-	light.shadow.windowSize = radius * 10;
-	light.shadow.cameraNear = radius / 50;
-	light.shadow.cameraFar = radius * 5;
-}
-
-const _shadowAdapterSphere = new Sphere();
-function updateLightDirectionByShadowAdapter(light, camera, box, sphere) {
-	if (!light.shadowAdapter) return;
-
-	ShadowAdapter.getSphereByBox3AndCamera(box, camera, 1, sphere.radius * 2 * light.shadowDistanceScale, _shadowAdapterSphere);
-	ShadowAdapter.setDirectionalLight(light, light.phi, light.theta, _shadowAdapterSphere);
-	light.shadow.cameraFar = light.shadow.cameraNear + sphere.radius * 5; // fix camera length
 }
 
 // morphTransform
