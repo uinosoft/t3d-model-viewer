@@ -1,5 +1,5 @@
-import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera, Vector3, Vector2,
-	ShaderMaterial, Mesh, PlaneGeometry, AmbientLight, DirectionalLight, TEXEL_ENCODING_TYPE,
+import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera,
+	Vector3, Vector2, Mesh, AmbientLight, DirectionalLight, TEXEL_ENCODING_TYPE,
 	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
 import { OrbitControls } from 't3d/addons/controls/OrbitControls.js';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
@@ -15,12 +15,12 @@ import Nanobar from 'nanobar';
 import * as fflate from 'fflate';
 
 import environmentMap from './configs/environments.json';
-import { GroundShader } from './viewer/shader/GroundShader.js';
 import { ViewerEffectComposer, geometryReplaceFunction } from './viewer/ViewerEffectComposer.js';
 import { ColorSpaceType } from './Utils.js';
 import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewer/ShadowMaterialCache.js';
 import { GLTFModelLoader } from './loaders/GLTFModelLoader.js';
 import { ViewerDirectionalLight } from './viewer/ViewerDirectionalLight.js';
+import { ViewerGround } from './viewer/ViewerGround.js';
 
 export class Viewer {
 
@@ -73,20 +73,7 @@ export class Viewer {
 		skyBox.renderLayer = 2;
 		camera.add(skyBox);
 
-		const groundMaterial = new ShaderMaterial(GroundShader);
-		groundMaterial.acceptLight = true;
-		groundMaterial.uniforms.showGrid = true;
-		const ground = new Mesh(
-			new PlaneGeometry(1, 1),
-			groundMaterial
-		);
-		ground.receiveShadow = true;
-		groundMaterial.metalness = 0;
-		groundMaterial.roughness = 1;
-		groundMaterial.transparent = true;
-		groundMaterial.polygonOffset = true;
-		groundMaterial.polygonOffsetFactor = 1;
-		groundMaterial.polygonOffsetUnits = 1;
+		const ground = new ViewerGround();
 		scene.add(ground);
 
 		const focalTarget = new Mesh(new SphereGeometry(1, 12, 6), new PBRMaterial());
@@ -365,14 +352,7 @@ export class Viewer {
 
 					this.setCameraState(true);
 
-					this._ground.position.y = -Math.abs(this._diagonal.y / 2);
-					const groundSize = Math.max(30, Math.abs(Math.max(this._diagonal.x, this._diagonal.z) * 2));
-					this._ground.scale.set(groundSize, 1, groundSize);
-					let size = Math.abs(Math.max(this._diagonal.x, this._diagonal.z) * 2);
-					size = Math.max(30, size);
-					this._ground.material.uniforms.size = size / 2;
-					this._ground.material.uniforms.gridSize = size / 10;
-					this._ground.material.uniforms.gridSize2 = size / 50;
+					this._ground.fitSize(this._diagonal);
 
 					this._root = root;
 					this._scene.add(root);
@@ -436,15 +416,7 @@ export class Viewer {
 	}
 
 	setGround(options) {
-		this._ground.visible = options.show;
-		this._ground.material.uniforms.color = [parseInt(options.color.charAt(1) + options.color.charAt(2), 16) / 255, parseInt(options.color.charAt(3) + options.color.charAt(4), 16) / 255, parseInt(options.color.charAt(5) + options.color.charAt(6), 16) / 255, 1];
-		this._ground.material.uniforms.showGrid = options.grid;
-		let size = Math.abs(Math.max(this._diagonal.x, this._diagonal.z) * 2);
-		size = Math.max(30, size);
-		this._ground.material.uniforms.size = size / 2;
-		this._ground.material.uniforms.gridSize = size / 10;
-		this._ground.material.uniforms.gridSize2 = size / 50;
-
+		this._ground.setStyle(options);
 		this._dirty = true;
 	}
 
