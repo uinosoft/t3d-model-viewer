@@ -311,9 +311,15 @@ export class Viewer {
 			this._modelLoader.load(url)
 				.then(gltf => {
 					this._ground.visible = true;
+
 					this.clear();
+
 					this._boundingBox = new Box3();
+
 					blobURLs.forEach(URL.revokeObjectURL);
+
+					let transmission = false;
+
 					const root = gltf.root;
 					root.traverse(node => {
 						if (node.isMesh) {
@@ -332,6 +338,10 @@ export class Viewer {
 							if (node.material.type === 'basic') {
 								// remove envMap effect for basic material
 								node.material.envMap = undefined;
+							}
+							if (node.material.shaderName === 'TransmissionPBR') {
+								node.renderLayer = 20;
+								transmission = true;
 							}
 						}
 
@@ -353,6 +363,8 @@ export class Viewer {
 					this.setCameraState(true);
 
 					this._ground.fitSize(this._diagonal);
+
+					this._effectComposer.getEffect('Transmission').active = transmission;
 
 					this._root = root;
 					this._scene.add(root);

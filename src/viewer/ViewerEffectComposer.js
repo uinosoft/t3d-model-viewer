@@ -2,6 +2,8 @@ import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
 import { GeometryUtils } from 't3d/addons/geometries/GeometryUtils.js';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
 import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
+import { TransmissionBuffer } from 't3d-effect-composer/addons/transmission/TransmissionBuffer.js';
+import { TransmissionEffect } from 't3d-effect-composer/addons/transmission/TransmissionEffect.js';
 import { UVBuffer } from 't3d-effect-composer/addons/uv/UVBuffer.js';
 import { UVDebugger } from 't3d-effect-composer/addons/uv/UVDebugger.js';
 import { LensflareDebugger } from 't3d-effect-composer/addons/lensflare/LensflareDebugger.js';
@@ -33,6 +35,7 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 		this.getBuffer('SceneBuffer').setOutputEncoding(TEXEL_ENCODING_TYPE.SRGB);
 		this.getBuffer('ColorMarkBuffer').setMaterialReplaceFunction(defaultMaterialReplaceFunction);
+		this.addBuffer('TransmissionBuffer', new TransmissionBuffer(width, height, options));
 		this.addBuffer('UVBuffer', new UVBuffer(width, height, { uvCheckTexture }));
 		this.addBuffer('LensflareBuffer', new LensflareBuffer(width, height, options));
 		this._syncAttachments();
@@ -52,6 +55,9 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 			{ key: 'SceneBuffer' },
 			{ key: 'ColorMarkBuffer', mask: RenderListMask.ALL }
 		];
+
+		this.addEffect('Transmission', new TransmissionEffect(), -1);
+		this.getEffect('Transmission').active = false;
 
 		this.addEffect('Lensflare', new LensflareEffect(), 101.5);
 		this.getEffect('Lensflare').active = true;

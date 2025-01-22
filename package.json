@@ -23,7 +23,7 @@
     "t3d-effect-composer": "^0.3.1"
   },
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host --force",
     "build": "vite build",
     "preview": "vite preview",
     "build-templates": "handlebars ./public/hbs/report_template.handlebars -f ./public/hbs/report_template.precompiled.js && handlebars ./public/hbs/report_toggle.handlebars -f ./public/hbs/report_toggle.precompiled.js",
