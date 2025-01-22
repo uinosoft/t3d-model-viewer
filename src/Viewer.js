@@ -1,6 +1,6 @@
 import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera,
 	Vector3, Vector2, Mesh, AmbientLight, DirectionalLight, TEXEL_ENCODING_TYPE,
-	Box3, Sphere, DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
+	DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
 import { OrbitControls } from 't3d/addons/controls/OrbitControls.js';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
 import { RGBETexture2DLoader } from 't3d/addons/loaders/RGBELoader.js';
@@ -9,6 +9,7 @@ import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
 import { Timer } from 't3d/addons/misc/Timer.js';
 import { SkyBox } from 't3d/addons/objects/SkyBox.js';
 import { Raycaster } from 't3d/addons/Raycaster.js';
+// import { Box3Helper } from 't3d/addons/objects/Box3Helper.js';
 
 import { default as TWEEN } from '@tweenjs/tween.js';
 import Nanobar from 'nanobar';
@@ -21,6 +22,7 @@ import { defaultGetDepthMaterialFn, defaultGetDistanceMaterialFn } from './viewe
 import { GLTFModelLoader } from './loaders/GLTFModelLoader.js';
 import { ViewerDirectionalLight } from './viewer/ViewerDirectionalLight.js';
 import { ViewerGround } from './viewer/ViewerGround.js';
+import { ModelBounds } from './viewer/ModelBounds.js';
 
 export class Viewer {
 
@@ -101,6 +103,12 @@ export class Viewer {
 		directionalLight2.shadowAdapter = false;
 		scene.add(directionalLight2);
 
+		const modelBounds = new ModelBounds();
+
+		// const boundingBoxHelper = new Box3Helper(modelBounds.box);
+		// boundingBoxHelper.material.envMap = undefined;
+		// scene.add(boundingBoxHelper);
+
 		const textureLoader = new Texture2DLoader();
 
 		camera.gammaFactor = 2.0;
@@ -150,8 +158,6 @@ export class Viewer {
 		this._directionalLight2 = directionalLight2;
 
 		this._root = null;
-		this._diagonal = new Vector3();
-		this._diameter = null;
 		this._wireframe = null;
 		this.animations = null;
 		this.actions = null;
@@ -162,13 +168,10 @@ export class Viewer {
 			near: 1,
 			far: 1000
 		};
-		this._boundingBox = new Box3();
-		this._boundingSphere = new Sphere();
+		this._modelBounds = modelBounds;
 
 		this._animationFrame = null;
 		this._running = false;
-
-		this._updatedBoundingBoxByAction = false;
 
 		this._cameraDefaultView = {
 			start: [60, 10, 8],
@@ -188,7 +191,6 @@ export class Viewer {
 			if (this._running) {
 				this._animationFrame = requestAnimationFrame(loop);
 				this.tick(timeStamp);
-				this.updateBoundingBox();
 			}
 		};
 
@@ -228,8 +230,8 @@ export class Viewer {
 		this._directionalLightCamera.position.set(this._camera.position.x, this._camera.position.y, this._camera.position.z);
 		this._directionalLightCamera.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
 
-		this._directionalLight.updateDirection(this._camera, this._boundingBox, this._boundingSphere);
-		this._directionalLight2.updateDirection(this._camera, this._boundingBox, this._boundingSphere);
+		this._directionalLight.updateDirection(this._camera, this._modelBounds);
+		this._directionalLight2.updateDirection(this._camera, this._modelBounds);
 
 		const focalTargetViewPos = _vec3_1.copy(this._focalTarget.position).applyMatrix4(this._camera.viewMatrix);
 		this._effectComposer.updateDOFFocalDepth(-focalTargetViewPos.z);
@@ -247,22 +249,6 @@ export class Viewer {
 		this._effectComposer.render(this._renderer, this._scene, this._camera, this._backRenderTarget);
 	}
 
-	updateBoundingBox() {
-		if (this._updatedBoundingBoxByAction) return;
-		// The boundingBox is updated only when the animation is playing
-		if (this._root && this.actions) {
-			for (let i = 0; i < this.actions.length; i++) {
-				if (this.actionStates[this.actions[i].clip.name]) {
-					getBoundingBox(this._root, this._boundingBox);
-					setBoundingSphereByBox(this._boundingBox, this._boundingSphere);
-					this.setCameraState();
-					this._updatedBoundingBoxByAction = true;
-					break;
-				}
-			}
-		}
-	}
-
 	resize() {
 		const { clientHeight, clientWidth } = this.el;
 		this._canvas.style.width = clientWidth + 'px';
@@ -272,11 +258,12 @@ export class Viewer {
 		const height = this._canvas.clientHeight || 2;
 
 		const aspect = height / width;
+		const { diameter } = this._modelBounds;
 
 		if (this._cameraDefault === 'perspective') {
 			this._camera.setPerspective(this._fov / 180 * Math.PI, width / height, this._cameraClip.near, this._cameraClip.far);
 		} else {
-			this._camera.setOrtho(-this._diameter * 2, this._diameter * 2, -this._diameter * 2 * aspect, this._diameter * 2 * aspect, -this._cameraClip.far, this._cameraClip.far);
+			this._camera.setOrtho(-diameter * 2, diameter * 2, -diameter * 2 * aspect, diameter * 2 * aspect, -this._cameraClip.far, this._cameraClip.far);
 		}
 		this._backRenderTarget.resize(width, height);
 		this._effectComposer.resize(width, height);
@@ -314,7 +301,7 @@ export class Viewer {
 
 					this.clear();
 
-					this._boundingBox = new Box3();
+					this._modelBounds.makeEmpty();
 
 					blobURLs.forEach(URL.revokeObjectURL);
 
@@ -345,24 +332,26 @@ export class Viewer {
 							}
 						}
 
-						if (!_rootBones.includes(node) && node.isBone && !node.parent.isBone) {
-							_rootBones.push(node);
-						}
+						this._modelBounds.collectRootBones(node);
 					});
 
 					gltf.animations && this.setClips(gltf.animations);
+					this.animations && this.animations.update(0); // apply frame 0
 
-					getBoundingBox(root, this._boundingBox);
-					setBoundingSphereByBox(this._boundingBox, this._boundingSphere);
-					const center = this._boundingSphere.center;
-					root.position.x += (root.position.x - center.x);
-					root.position.y += (root.position.y - center.y);
-					root.position.z += (root.position.z - center.z);
-					getBoundingBox(root, this._boundingBox); // For models without animation
+					// compute boundings
+					this._modelBounds.computeBounds(root);
+
+					// move model to center
+					const center = this._modelBounds.center;
+					const offset = _vec3_1.subVectors(root.position, center);
+					root.position.add(offset);
+
+					// fix boundings
+					this._modelBounds.move(offset);
 
 					this.setCameraState(true);
 
-					this._ground.fitSize(this._diagonal);
+					this._ground.fitSize(this._modelBounds.diagonal);
 
 					this._effectComposer.getEffect('Transmission').active = transmission;
 
@@ -521,12 +510,13 @@ export class Viewer {
 		const width = this._canvas.clientWidth || 2;
 		const height = this._canvas.clientHeight || 2;
 		const aspect = height / width;
+		const { diameter } = this._modelBounds;
 		if (options.type === 'perspective') {
 			this._camera.setPerspective(this._fov / 180 * Math.PI, width / height, this._cameraClip.near, this._cameraClip.far);
 			this._camera.add(this._skyBox);
 			this._cameraDefault = 'perspective';
 		} else {
-			this._camera.setOrtho(-this._diameter * 2, this._diameter * 2, -this._diameter * 2 * aspect, this._diameter * 2 * aspect, -this._cameraClip.far, this._cameraClip.far);
+			this._camera.setOrtho(-diameter * 2, diameter * 2, -diameter * 2 * aspect, diameter * 2 * aspect, -this._cameraClip.far, this._cameraClip.far);
 			this._camera.remove(this._skyBox);
 			this._cameraDefault = 'othographic';
 		}
@@ -539,9 +529,7 @@ export class Viewer {
 	}
 
 	setCameraState(resetStart) {
-		this._diagonal.subVectors(this._boundingBox.max, this._boundingBox.min);
-		const diameter = this._diagonal.getLength();
-		this._diameter = diameter;
+		const { diameter } = this._modelBounds;
 
 		const oldStart = this._camera.position.clone();
 
@@ -563,7 +551,7 @@ export class Viewer {
 		const spherical = new Spherical();
 
 		if (resetStart) {
-			spherical.radius = this._boundingSphere.radius * cameraDefaultView.start[2];
+			spherical.radius = diameter * 0.5 * cameraDefaultView.start[2];
 			spherical.phi = cameraDefaultView.start[0] * Math.PI / 180;
 			spherical.theta = cameraDefaultView.start[1] * Math.PI / 180;
 			this._camera.position.setFromSpherical(spherical);
@@ -571,7 +559,7 @@ export class Viewer {
 			this._camera.position.copy(oldStart);
 		}
 
-		spherical.radius = this._boundingSphere.radius * cameraDefaultView.to[2];
+		spherical.radius = diameter * 0.5 * cameraDefaultView.to[2];
 		spherical.phi = cameraDefaultView.to[0] * Math.PI / 180;
 		spherical.theta = cameraDefaultView.to[1] * Math.PI / 180;
 		this.runCameraAnimation(new Vector3().setFromSpherical(spherical));
@@ -669,7 +657,7 @@ export class Viewer {
 	}
 
 	updateFocalTarget(target) {
-		const focalScale = this._boundingSphere.radius / 100;
+		const focalScale = this._modelBounds.diameter / 200;
 		this._focalTarget.scale.set(focalScale, focalScale, focalScale);
 		this._focalTarget.position.fromArray(target);
 
@@ -679,8 +667,7 @@ export class Viewer {
 	clear() {
 		if (!this._root) return;
 
-		_rootBones = [];
-		this._updatedBoundingBoxByAction = false;
+		this._modelBounds.clearRootBones();
 
 		this.stopAllClips();
 		this.actions = [];
@@ -720,87 +707,6 @@ function setColor(color, hex) {
 	color.r = parseInt(hex.charAt(1) + hex.charAt(2), 16) / 255;
 	color.g = parseInt(hex.charAt(3) + hex.charAt(4), 16) / 255;
 	color.b = parseInt(hex.charAt(5) + hex.charAt(6), 16) / 255;
-}
-
-let _rootBones = [];
-const _childBox = new Box3();
-const _pos = new Vector3();
-
-function getBoundingBox(object, target) {
-	_pos.set(0, 0, 0);
-	_childBox.makeEmpty();
-	target.makeEmpty();
-	object.updateMatrix();
-
-	object.traverse(node => {
-		if (node.geometry) {
-			if (node.isSkinnedMesh) {
-				node.geometry.computeBoundingBox();
-				_childBox.copy(node.geometry.boundingBox);
-				_rootBones.forEach(rootbone => {
-					const rootIndex = node.skeleton.bones.indexOf(rootbone);
-					if (rootIndex !== -1) {
-						_childBox.applyMatrix4(node.skeleton.boneInverses[rootIndex]);
-						_childBox.applyMatrix4(rootbone.worldMatrix);
-						target.expandByBox3(_childBox);
-					}
-				});
-			} else if (node.morphTargetInfluences) {
-				morphTransform(node, _childBox, _pos);
-				_childBox.applyMatrix4(node.worldMatrix);
-				target.expandByBox3(_childBox);
-			} else {
-				node.geometry.computeBoundingBox();
-				_childBox.copy(node.geometry.boundingBox).applyMatrix4(node.worldMatrix);
-				target.expandByBox3(_childBox);
-			}
-		}
-	});
-
-	return target;
-}
-
-function setBoundingSphereByBox(box, target) {
-	box.getCenter(target.center);
-
-	const diagonal = new Vector3().subVectors(box.max, box.min);
-	target.radius = diagonal.getLength() / 2;
-
-	return target;
-}
-
-// morphTransform
-// if (node.morphTargetInfluences)
-const _morph = new Vector3();
-const _temp = new Vector3();
-
-function morphTransform(node, childBox, pos) {
-	const index = node.geometry.index.buffer.array;
-	const position = node.geometry.getAttribute('a_Position');
-	childBox.makeEmpty();
-	for (let i = 0; i < index.length; i += 1) {
-		const a = index[i];
-		pos.fromArray(position.buffer.array, a * 3);
-		morphNodeTransform(node, a, pos);
-		childBox.expandByPoint(pos);
-	}
-	return childBox;
-}
-
-function morphNodeTransform(object, index, target) {
-	const morphPosition = object.geometry.morphAttributes.position;
-	const morphInfluences = object.morphTargetInfluences;
-	_morph.set(0, 0, 0);
-	_temp.set(0, 0, 0);
-	for (let i = 0; i < morphPosition.length; i++) {
-		const influence = morphInfluences[i];
-		const morphAttribute = morphPosition[i];
-		if (influence === 0 || influence - 0 < Number.EPSILON) continue;
-		_temp.fromArray(morphAttribute.buffer.array, index * 3);
-		_morph.addScaledVector(_temp, influence);
-	}
-	target.add(_morph);
-	return target;
 }
 
 function hasRunningAction(actions) {

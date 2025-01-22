@@ -36,11 +36,11 @@ export class ViewerDirectionalLight extends DirectionalLight {
 		this._theta = coord.x * Math.PI / 180;
 	}
 
-	updateDirection(camera, box, sphere) {
+	updateDirection(camera, modelBounds) {
 		if (this.shadowAdapter) {
-			this._updateDirectionByShadowAdapter(camera, box, sphere);
+			this._updateDirectionByShadowAdapter(camera, modelBounds);
 		} else {
-			this._updateDirection(sphere.radius);
+			this._updateDirection(modelBounds.diameter * 0.5);
 		}
 	}
 
@@ -55,10 +55,11 @@ export class ViewerDirectionalLight extends DirectionalLight {
 		this.shadow.cameraFar = radius * 5;
 	}
 
-	_updateDirectionByShadowAdapter(camera, box, sphere) {
-		ShadowAdapter.getSphereByBox3AndCamera(box, camera, 1, sphere.radius * 2 * this.shadowDistanceScale, _shadowAdapterSphere);
+	_updateDirectionByShadowAdapter(camera, modelBounds) {
+		const { box, diameter } = modelBounds;
+		ShadowAdapter.getSphereByBox3AndCamera(box, camera, 1, diameter * this.shadowDistanceScale, _shadowAdapterSphere);
 		ShadowAdapter.setDirectionalLight(this, this._phi, this._theta, _shadowAdapterSphere);
-		this.shadow.cameraFar = this.shadow.cameraNear + sphere.radius * 5; // fix camera length
+		this.shadow.cameraFar = this.shadow.cameraNear + diameter * 2.5; // fix camera length
 	}
 
 }

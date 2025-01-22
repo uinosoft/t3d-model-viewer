@@ -102,7 +102,7 @@ export class App {
 			.catch(e => onError(e))
 			.then(gltf => {
 				this.uiCtrl = this.uiCtrl || new UIControl(this.viewer);
-				this.uiCtrl.updateUIByModelBounds(this.viewer._boundingSphere.radius);
+				this.uiCtrl.updateUIByModelBounds(this.viewer._modelBounds.diameter * 0.5);
 				this.uiCtrl.setAnimations(gltf.animations);
 				this.validator.validate(gltf.data, fileURL, rootPath, fileMap, gltf);
 				this.hideSpinner();
