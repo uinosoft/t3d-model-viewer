@@ -40,6 +40,7 @@ export class UIControl {
 		});
 		environmentFolder.add(options.environment, 'texture', ['Pisa', 'Factory_Catwalk', 'Barce_Rooftop_C', 'Grand_Canyon_C', 'Hall', 'Ice_Lake', 'Old_Industrial_Hall']);
 		environmentFolder.add(options.environment, 'diffuseIntensity', 0, MAX_ENV_INTENSITY, 0.001);
+		environmentFolder.add(options.environment, 'specularIntensity', 0, MAX_ENV_INTENSITY, 0.001);
 		environmentFolder.add(options.environment, 'skyRoughness', 0, 8, 0.1);
 
 		// Camera
@@ -366,7 +367,8 @@ export class UIControl {
 
 			gui.children[2].children[0].setValue(options.environment.texture);
 			gui.children[2].children[1].setValue(options.environment.diffuseIntensity);
-			gui.children[2].children[2].setValue(options.environment.skyRoughness);
+			gui.children[2].children[2].setValue(options.environment.specularIntensity);
+			gui.children[2].children[3].setValue(options.environment.skyRoughness);
 
 			gui.children[3].children[0].setValue(options.camera.fov);
 			gui.children[3].children[1].setValue(options.camera.type);

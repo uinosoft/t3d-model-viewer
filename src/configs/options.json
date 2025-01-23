@@ -11,6 +11,7 @@
     "environment": {
         "texture": "Ice_Lake",
         "diffuseIntensity": 1,
+        "specularIntensity": 1,
         "skyRoughness": 8
     },
     "camera": {

@@ -456,7 +456,8 @@ export class Viewer {
 	}
 
 	setEnvironmentParams(options) {
-		this._scene.environmentLightIntensity = options.diffuseIntensity;
+		this._scene.envDiffuseIntensity = options.diffuseIntensity;
+		this._scene.envSpecularIntensity = options.specularIntensity;
 		this._skyBox.level = options.skyRoughness;
 
 		this._dirty = true;
