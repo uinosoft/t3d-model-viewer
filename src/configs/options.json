@@ -1,5 +1,5 @@
 {
-    "version": "0.0.9",
+    "version": "0.1.0",
     "global": {
         "wireframe": false
     },
@@ -95,17 +95,27 @@
             "quality": "Medium",
             "autoSampleWeight": true
         }, 
+        "gtao": {
+            "active": false,
+            "multiBounce": false,
+            "maxDistance": 10,
+            "maxPixel": 14,
+            "rayMarchSegment": 10,
+            "darkFactor": 1
+        },
         "ssr": {
             "active": false,
             "pixelStride": 8,
             "maxIteration": 5,
             "maxSteps": 50,
             "maxRayDistance": 500,
-            "enablePixelStrideZCutoff": true,
+            "enablePixelStrideZCutoff": false,
             "pixelStrideZCutoff": 50,
             "minGlossiness": 0.2,
             "strength": 0.2,
-            "falloff": 0.5
+            "falloff": 0.5,
+            "zThicknessThreshold": 0.5,
+            "importanceSampling": false
         }, 
         "dof": {
             "active": false,
@@ -160,7 +170,8 @@
     },
     "debuggers": {
         "type": "None",
-        "showPickFocus": false
+        "showPickFocus": false,
+        "showBounds": false
     },
     "animation": {
         "timeScale": 1

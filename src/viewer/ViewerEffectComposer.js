@@ -4,6 +4,8 @@ import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
 import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
 import { TransmissionBuffer } from 't3d-effect-composer/addons/transmission/TransmissionBuffer.js';
 import { TransmissionEffect } from 't3d-effect-composer/addons/transmission/TransmissionEffect.js';
+import GTAOEffect from 't3d-effect-composer/addons/gtao/GTAOEffect.js';
+import GTAODebugger from 't3d-effect-composer/addons/gtao/GTAODebugger.js';
 import { UVBuffer } from 't3d-effect-composer/addons/uv/UVBuffer.js';
 import { UVDebugger } from 't3d-effect-composer/addons/uv/UVDebugger.js';
 import { LensflareDebugger } from 't3d-effect-composer/addons/lensflare/LensflareDebugger.js';
@@ -59,6 +61,8 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		this.addEffect('Transmission', new TransmissionEffect(), -1);
 		this.getEffect('Transmission').active = false;
 
+		this.addEffect('GTAO', new GTAOEffect(), 0.5);
+
 		this.addEffect('Lensflare', new LensflareEffect(), 101.5);
 		this.getEffect('Lensflare').active = true;
 
@@ -78,6 +82,7 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 		this._gBufferDebugger = new GBufferDebugger();
 		this._ssaoDebugger = new SSAODebugger();
+		this._gtaoDebugger = new GTAODebugger();
 		this._ssrDebugger = new SSRDebugger();
 		this._uvDebugger = new UVDebugger();
 		this._lensflareDebugger = new LensflareDebugger();
@@ -105,6 +110,13 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 		for (const key in options.ssao) {
 			if (key !== 'options') {
 				ssaoEffect[key] = options.ssao[key];
+			}
+		}
+
+		const gtaoEffect = this.getEffect('GTAO');
+		for (const key in options.gtao) {
+			if (key !== 'options') {
+				gtaoEffect[key] = options.gtao[key];
 			}
 		}
 
@@ -180,6 +192,8 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 			this.debugger = this._gBufferDebugger;
 		} else if (options.type === 'SSAO') {
 			this.debugger = this._ssaoDebugger;
+		} else if (options.type === 'GTAO') {
+			this.debugger = this._gtaoDebugger;
 		} else if (options.type === 'SSR') {
 			this.debugger = this._ssrDebugger;
 		} else if (options.type === 'UV') {

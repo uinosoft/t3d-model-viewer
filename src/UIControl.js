@@ -135,6 +135,14 @@ export class UIControl {
 		ssaoEffectFolder.add(options.postEffect.ssao, 'quality', ['Low', 'Medium', 'High', 'Ultra']);
 		ssaoEffectFolder.add(options.postEffect.ssao, 'autoSampleWeight');
 
+		const gtaoEffectFolder = effectFolder.addFolder('GTAO');
+		gtaoEffectFolder.add(options.postEffect.gtao, 'active');
+		gtaoEffectFolder.add(options.postEffect.gtao, 'multiBounce');
+		gtaoEffectFolder.add(options.postEffect.gtao, 'maxDistance', 0, 50, 1);
+		gtaoEffectFolder.add(options.postEffect.gtao, 'maxPixel', 0, 100, 1);
+		gtaoEffectFolder.add(options.postEffect.gtao, 'rayMarchSegment', 0, 30, 1);
+		gtaoEffectFolder.add(options.postEffect.gtao, 'darkFactor', 0, 2, 0.01);
+
 		const ssrEffectFolder = effectFolder.addFolder('SSR');
 		ssrEffectFolder.add(options.postEffect.ssr, 'active');
 		ssrEffectFolder.add(options.postEffect.ssr, 'pixelStride', 1, 100, 1);
@@ -146,6 +154,8 @@ export class UIControl {
 		ssrEffectFolder.add(options.postEffect.ssr, 'minGlossiness', 0, 1, 0.01);
 		ssrEffectFolder.add(options.postEffect.ssr, 'strength', 0, 1.5, 0.01);
 		ssrEffectFolder.add(options.postEffect.ssr, 'falloff', 0, 1, 0.01);
+		ssrEffectFolder.add(options.postEffect.ssr, 'zThicknessThreshold', 0, 10, 0.01);
+		ssrEffectFolder.add(options.postEffect.ssr, 'importanceSampling');
 
 		const dofEffectFolder = effectFolder.addFolder('DOF');
 		dofEffectFolder.add(options.postEffect.dof, 'active');
@@ -228,7 +238,8 @@ export class UIControl {
 			viewer.setDebugger(options.debuggers);
 		});
 		debuggerFolder.add(options.debuggers, 'showPickFocus');
-		debuggerFolder.add(options.debuggers, 'type', ['None', 'Normal', 'Depth', 'Position', 'SSAO', 'SSR', 'UV', 'Lensflare']);
+		debuggerFolder.add(options.debuggers, 'showBounds');
+		debuggerFolder.add(options.debuggers, 'type', ['None', 'Normal', 'Depth', 'Position', 'SSAO', 'GTAO', 'SSR', 'UV', 'Lensflare']);
 
 		// Animation
 
@@ -417,64 +428,74 @@ export class UIControl {
 			gui.children[5].children[3].children[5].setValue(options.postEffect.ssao.quality);
 			gui.children[5].children[3].children[6].setValue(options.postEffect.ssao.autoSampleWeight);
 
-			gui.children[5].children[4].children[0].setValue(options.postEffect.ssr.active);
-			gui.children[5].children[4].children[1].setValue(options.postEffect.ssr.pixelStride);
-			gui.children[5].children[4].children[2].setValue(options.postEffect.ssr.maxIteration);
-			gui.children[5].children[4].children[3].setValue(options.postEffect.ssr.maxSteps);
-			gui.children[5].children[4].children[4].setValue(options.postEffect.ssr.maxRayDistance);
-			gui.children[5].children[4].children[5].setValue(options.postEffect.ssr.enablePixelStrideZCutoff);
-			gui.children[5].children[4].children[6].setValue(options.postEffect.ssr.pixelStrideZCutoff);
-			gui.children[5].children[4].children[7].setValue(options.postEffect.ssr.minGlossiness);
-			gui.children[5].children[4].children[8].setValue(options.postEffect.ssr.strength);
-			gui.children[5].children[4].children[9].setValue(options.postEffect.ssr.falloff);
+			gui.children[5].children[4].children[0].setValue(options.postEffect.gtao.active);
+			gui.children[5].children[4].children[1].setValue(options.postEffect.gtao.multiBounce);
+			gui.children[5].children[4].children[2].setValue(options.postEffect.gtao.maxDistance);
+			gui.children[5].children[4].children[3].setValue(options.postEffect.gtao.maxPixel);
+			gui.children[5].children[4].children[4].setValue(options.postEffect.gtao.rayMarchSegment);
+			gui.children[5].children[4].children[5].setValue(options.postEffect.gtao.darkFactor);
 
-			gui.children[5].children[5].children[0].setValue(options.postEffect.dof.active);
-			gui.children[5].children[5].children[1].setValue(options.postEffect.dof.focalLength);
-			gui.children[5].children[5].children[2].setValue(options.postEffect.dof.fstop);
-			gui.children[5].children[5].children[3].setValue(options.postEffect.dof.maxblur);
-			gui.children[5].children[5].children[4].setValue(options.postEffect.dof.threshold);
-			gui.children[5].children[5].children[5].setValue(options.postEffect.dof.gain);
-			gui.children[5].children[5].children[6].setValue(options.postEffect.dof.bias);
-			gui.children[5].children[5].children[7].setValue(options.postEffect.dof.dithering);
+			gui.children[5].children[5].children[0].setValue(options.postEffect.ssr.active);
+			gui.children[5].children[5].children[1].setValue(options.postEffect.ssr.pixelStride);
+			gui.children[5].children[5].children[2].setValue(options.postEffect.ssr.maxIteration);
+			gui.children[5].children[5].children[3].setValue(options.postEffect.ssr.maxSteps);
+			gui.children[5].children[5].children[4].setValue(options.postEffect.ssr.maxRayDistance);
+			gui.children[5].children[5].children[5].setValue(options.postEffect.ssr.enablePixelStrideZCutoff);
+			gui.children[5].children[5].children[6].setValue(options.postEffect.ssr.pixelStrideZCutoff);
+			gui.children[5].children[5].children[7].setValue(options.postEffect.ssr.minGlossiness);
+			gui.children[5].children[5].children[8].setValue(options.postEffect.ssr.strength);
+			gui.children[5].children[5].children[9].setValue(options.postEffect.ssr.falloff);
+			gui.children[5].children[5].children[10].setValue(options.postEffect.ssr.zThicknessThreshold);
+			gui.children[5].children[5].children[11].setValue(options.postEffect.ssr.importanceSampling);
 
-			gui.children[5].children[6].children[0].setValue(options.postEffect.fxaa.active);
+			gui.children[5].children[6].children[0].setValue(options.postEffect.dof.active);
+			gui.children[5].children[6].children[1].setValue(options.postEffect.dof.focalLength);
+			gui.children[5].children[6].children[2].setValue(options.postEffect.dof.fstop);
+			gui.children[5].children[6].children[3].setValue(options.postEffect.dof.maxblur);
+			gui.children[5].children[6].children[4].setValue(options.postEffect.dof.threshold);
+			gui.children[5].children[6].children[5].setValue(options.postEffect.dof.gain);
+			gui.children[5].children[6].children[6].setValue(options.postEffect.dof.bias);
+			gui.children[5].children[6].children[7].setValue(options.postEffect.dof.dithering);
 
-			gui.children[5].children[7].children[0].setValue(options.postEffect.chromaticaberration.active);
-			gui.children[5].children[7].children[1].setValue(options.postEffect.chromaticaberration.chromaFactor);
+			gui.children[5].children[7].children[0].setValue(options.postEffect.fxaa.active);
 
-			gui.children[5].children[8].children[0].setValue(options.postEffect.vignetting.active);
-			gui.children[5].children[8].children[1].setValue(options.postEffect.vignetting.color);
-			gui.children[5].children[8].children[2].setValue(options.postEffect.vignetting.offset);
+			gui.children[5].children[8].children[0].setValue(options.postEffect.chromaticaberration.active);
+			gui.children[5].children[8].children[1].setValue(options.postEffect.chromaticaberration.chromaFactor);
 
-			gui.children[5].children[9].children[0].setValue(options.postEffect.bluredge.active);
-			gui.children[5].children[9].children[1].setValue(options.postEffect.bluredge.offset);
+			gui.children[5].children[9].children[0].setValue(options.postEffect.vignetting.active);
+			gui.children[5].children[9].children[1].setValue(options.postEffect.vignetting.color);
+			gui.children[5].children[9].children[2].setValue(options.postEffect.vignetting.offset);
 
-			gui.children[5].children[10].children[0].setValue(options.postEffect.film.active);
-			gui.children[5].children[10].children[1].setValue(options.postEffect.film.noiseIntensity);
-			gui.children[5].children[10].children[2].setValue(options.postEffect.film.scanlinesIntensity);
-			gui.children[5].children[10].children[3].setValue(options.postEffect.film.scanlinesCount);
-			gui.children[5].children[10].children[4].setValue(options.postEffect.film.grayscale);
+			gui.children[5].children[10].children[0].setValue(options.postEffect.bluredge.active);
+			gui.children[5].children[10].children[1].setValue(options.postEffect.bluredge.offset);
 
-			gui.children[5].children[11].children[0].setValue(options.postEffect.toneMapping.active);
-			gui.children[5].children[11].children[1].setValue(options.postEffect.toneMapping.toneMappingType);
-			gui.children[5].children[11].children[2].setValue(options.postEffect.toneMapping.toneMappingExposure);
-			gui.children[5].children[11].children[3].setValue(options.postEffect.toneMapping.outputColorSpace);
+			gui.children[5].children[11].children[0].setValue(options.postEffect.film.active);
+			gui.children[5].children[11].children[1].setValue(options.postEffect.film.noiseIntensity);
+			gui.children[5].children[11].children[2].setValue(options.postEffect.film.scanlinesIntensity);
+			gui.children[5].children[11].children[3].setValue(options.postEffect.film.scanlinesCount);
+			gui.children[5].children[11].children[4].setValue(options.postEffect.film.grayscale);
 
-			gui.children[5].children[12].children[0].setValue(options.postEffect.taa.active);
+			gui.children[5].children[12].children[0].setValue(options.postEffect.toneMapping.active);
+			gui.children[5].children[12].children[1].setValue(options.postEffect.toneMapping.toneMappingType);
+			gui.children[5].children[12].children[2].setValue(options.postEffect.toneMapping.toneMappingExposure);
+			gui.children[5].children[12].children[3].setValue(options.postEffect.toneMapping.outputColorSpace);
 
-			gui.children[5].children[13].children[0].setValue(options.postEffect.sharpness.active);
-			gui.children[5].children[13].children[1].setValue(options.postEffect.sharpness.strength);
+			gui.children[5].children[13].children[0].setValue(options.postEffect.taa.active);
 
-			gui.children[5].children[14].children[0].setValue(options.postEffect.glow.active);
-			gui.children[5].children[14].children[1].setValue(options.postEffect.glow.strength);
-			gui.children[5].children[14].children[2].setValue(options.postEffect.glow.radius);
-			gui.children[5].children[14].children[3].setValue(options.postEffect.glow.threshold);
-			gui.children[5].children[14].children[4].setValue(options.postEffect.glow.smoothWidth);
+			gui.children[5].children[14].children[0].setValue(options.postEffect.sharpness.active);
+			gui.children[5].children[14].children[1].setValue(options.postEffect.sharpness.strength);
 
-			gui.children[5].children[15].children[0].setValue(options.postEffect.lensflare.active);
+			gui.children[5].children[15].children[0].setValue(options.postEffect.glow.active);
+			gui.children[5].children[15].children[1].setValue(options.postEffect.glow.strength);
+			gui.children[5].children[15].children[2].setValue(options.postEffect.glow.radius);
+			gui.children[5].children[15].children[3].setValue(options.postEffect.glow.threshold);
+			gui.children[5].children[15].children[4].setValue(options.postEffect.glow.smoothWidth);
+
+			gui.children[5].children[16].children[0].setValue(options.postEffect.lensflare.active);
 
 			gui.children[6].children[0].setValue(options.debuggers.showPickFocus);
-			gui.children[6].children[1].setValue(options.debuggers.type);
+			gui.children[6].children[1].setValue(options.debuggers.showBounds);
+			gui.children[6].children[2].setValue(options.debuggers.type);
 
 			gui.children[7].children[2].setValue(options.animation.timeScale);
 		}

@@ -9,7 +9,7 @@ import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
 import { Timer } from 't3d/addons/misc/Timer.js';
 import { SkyBox } from 't3d/addons/objects/SkyBox.js';
 import { Raycaster } from 't3d/addons/Raycaster.js';
-// import { Box3Helper } from 't3d/addons/objects/Box3Helper.js';
+import { Box3Helper } from 't3d/addons/objects/Box3Helper.js';
 
 import { default as TWEEN } from '@tweenjs/tween.js';
 import Nanobar from 'nanobar';
@@ -105,9 +105,10 @@ export class Viewer {
 
 		const modelBounds = new ModelBounds();
 
-		// const boundingBoxHelper = new Box3Helper(modelBounds.box);
-		// boundingBoxHelper.material.envMap = undefined;
-		// scene.add(boundingBoxHelper);
+		const boundsHelper = new Box3Helper(modelBounds.box);
+		boundsHelper.material.envMap = undefined;
+		boundsHelper.visible = false;
+		scene.add(boundsHelper);
 
 		const textureLoader = new Texture2DLoader();
 
@@ -169,6 +170,7 @@ export class Viewer {
 			far: 1000
 		};
 		this._modelBounds = modelBounds;
+		this._boundsHelper = boundsHelper;
 
 		this._animationFrame = null;
 		this._running = false;
@@ -501,6 +503,7 @@ export class Viewer {
 	setDebugger(options) {
 		this._effectComposer.setDebugger(options);
 		this._focalTarget.visible = options.showPickFocus;
+		this._boundsHelper.visible = options.showBounds;
 		this._dirty = true;
 	}
 
