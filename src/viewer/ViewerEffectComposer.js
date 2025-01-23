@@ -357,3 +357,43 @@ function getWireframeGeometry(geometry) {
 		return wireframeGeometry;
 	}
 }
+
+// fix transmission depth clear
+TransmissionBuffer.prototype.render = function(renderer, composer, scene, camera) {
+	if (!this.needRender()) return;
+
+	const useMSAA = composer.$useMSAA;
+	const renderTarget = useMSAA ? this._mrt : this._rt;
+
+	renderer.setRenderTarget(renderTarget);
+	renderer.setClearColor(0, 0, 0, 0);
+	renderer.clear(true, false, false);
+
+	const renderStates = scene.getRenderStates(camera);
+	const renderQueue = scene.getRenderQueue(camera);
+
+	const renderOptions = this._renderOptions;
+
+	renderer.beginRender();
+
+	const renderLayers = this.renderLayers;
+	for (let i = 0, l = renderLayers.length; i < l; i++) {
+		const { id, mask } = renderLayers[i];
+		const layer = renderQueue.getLayer(id);
+		if (layer) {
+			if (layer.opaqueCount > 0 && (mask & RenderListMask.OPAQUE)) {
+				renderer.renderRenderableList(layer.opaque, renderStates, renderOptions);
+			}
+			if (layer.transparentCount > 0 && (mask & RenderListMask.TRANSPARENT)) {
+				renderer.renderRenderableList(layer.transparent, renderStates, renderOptions);
+			}
+		}
+	}
+
+	renderer.endRender();
+
+	if (useMSAA) {
+		renderer.setRenderTarget(this._rt);
+		renderer.blitRenderTarget(this._mrt, this._rt, true, true, true);
+	}
+};
