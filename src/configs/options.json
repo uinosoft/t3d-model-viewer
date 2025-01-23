@@ -80,7 +80,6 @@
             "smoothWidth": 0.01
         }, 
         "glow": {
-            "active": false, 
             "strength": 1, 
             "radius": 0.4, 
             "threshold": 0.01, 

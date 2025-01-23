@@ -224,8 +224,9 @@ function defaultMaterialReplaceFunction(renderable) {
 	const morphTargets = !!renderable.object.morphTargetInfluences;
 	const drawMode = renderable.material.drawMode;
 	const useDiffuseMap = !!renderable.material.diffuseMap;
+	const useEmissiveMap = !!renderable.material.emissiveMap;
 
-	const key = useSkinning + '_' + morphTargets + '_' + drawMode + '' + useDiffuseMap;
+	const key = useSkinning + '_' + morphTargets + '_' + drawMode + '' + useDiffuseMap + '' + useEmissiveMap;
 
 	let result;
 
@@ -244,6 +245,7 @@ function defaultMaterialReplaceFunction(renderable) {
 	result.diffuse.copy(renderable.material.diffuse);
 	result.diffuseMap = renderable.material.diffuseMap;
 	result.emissive.copy(renderable.material.emissive);
+	result.emissiveMap = renderable.material.emissiveMap;
 
 	return result;
 }
@@ -260,10 +262,12 @@ const colorShader = {
         #include <skinning_pars_vert>
         #include <uv_pars_vert>
 		#include <diffuseMap_pars_vert>
+		#include <emissiveMap_pars_vert>
 		#include <logdepthbuf_pars_vert>
         void main() {
         	#include <uv_vert>
 			#include <diffuseMap_vert>
+			#include <emissiveMap_vert>
         	#include <begin_vert>
         	#include <morphtarget_vert>
         	#include <skinning_vert>
@@ -274,6 +278,7 @@ const colorShader = {
 	fragmentShader: `
         #include <common_frag>
         #include <diffuseMap_pars_frag>
+		#include <emissiveMap_pars_frag>
 		#include <alphaTest_pars_frag>
 
         #include <uv_pars_frag>
@@ -287,10 +292,17 @@ const colorShader = {
         void main() {
 			#include <logdepthbuf_frag>
 
-			vec4 outColor = vec4(u_Color, u_Opacity);
+			vec3 totalEmissiveRadiance = emissive;
+
+			#ifdef USE_EMISSIVEMAP
+				vec4 emissiveColor = emissiveMapTexelToLinear(texture2D(emissiveMap, vEmissiveMapUV));
+				totalEmissiveRadiance *= emissiveColor.rgb;
+			#endif
+
+			vec4 outColor = vec4(totalEmissiveRadiance, u_Opacity);
 
 			#ifdef USE_DIFFUSE_MAP
-				outColor *= texture2D(diffuseMap, vDiffuseMapUV);
+				outColor.a *= texture2D(diffuseMap, vDiffuseMapUV).a;
 			#endif
 
 			#ifdef ALPHATEST
@@ -298,9 +310,6 @@ const colorShader = {
 			#endif
 
 			outColor.a *= strength;
-			outColor.rgb *= outColor.a;
-
-			outColor.rgb += emissive;
 
             gl_FragColor = outColor;
         }

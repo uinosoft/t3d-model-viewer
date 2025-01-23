@@ -204,7 +204,6 @@ export class UIControl {
 		sharpnessEffectFolder.add(options.postEffect.sharpness, 'strength', 0, 1, 0.01);
 
 		const glowEffectFolder = effectFolder.addFolder('Glow');
-		glowEffectFolder.add(options.postEffect.glow, 'active');
 		glowEffectFolder.add(options.postEffect.glow, 'strength', 0, 2, 0.01);
 		glowEffectFolder.add(options.postEffect.glow, 'radius', 0, 5, 0.01);
 		glowEffectFolder.add(options.postEffect.glow, 'threshold', 0, 1, 0.01);
@@ -485,11 +484,10 @@ export class UIControl {
 			gui.children[5].children[14].children[0].setValue(options.postEffect.sharpness.active);
 			gui.children[5].children[14].children[1].setValue(options.postEffect.sharpness.strength);
 
-			gui.children[5].children[15].children[0].setValue(options.postEffect.glow.active);
-			gui.children[5].children[15].children[1].setValue(options.postEffect.glow.strength);
-			gui.children[5].children[15].children[2].setValue(options.postEffect.glow.radius);
-			gui.children[5].children[15].children[3].setValue(options.postEffect.glow.threshold);
-			gui.children[5].children[15].children[4].setValue(options.postEffect.glow.smoothWidth);
+			gui.children[5].children[15].children[0].setValue(options.postEffect.glow.strength);
+			gui.children[5].children[15].children[1].setValue(options.postEffect.glow.radius);
+			gui.children[5].children[15].children[2].setValue(options.postEffect.glow.threshold);
+			gui.children[5].children[15].children[3].setValue(options.postEffect.glow.smoothWidth);
 
 			gui.children[5].children[16].children[0].setValue(options.postEffect.lensflare.active);
 

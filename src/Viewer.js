@@ -307,7 +307,7 @@ export class Viewer {
 
 					blobURLs.forEach(URL.revokeObjectURL);
 
-					let transmission = false;
+					let transmission = false, glow = false;
 
 					const root = gltf.root;
 					root.traverse(node => {
@@ -325,6 +325,7 @@ export class Viewer {
 							const emissive = node.material.emissive;
 							if (emissive.r + emissive.g + emissive.b > 0.0) {
 								node.effects = { 'Glow': 1 };
+								glow = true;
 							}
 							if (node.material.type === 'basic') {
 								// remove envMap effect for basic material
@@ -358,6 +359,7 @@ export class Viewer {
 					this._ground.fitSize(this._modelBounds.diagonal);
 
 					this._effectComposer.getEffect('Transmission').active = transmission;
+					this._effectComposer.getEffect('Glow').active = glow;
 
 					this._root = root;
 					this._scene.add(root);
