@@ -317,7 +317,9 @@ export class Viewer {
 						}
 
 						if (node.material) {
-							node.material.__drawMode = node.material.drawMode;
+							if (node.material.__drawMode === undefined) {
+								node.material.__drawMode = node.material.drawMode;
+							}
 							node.material.drawMode = this._wireframe ? DRAW_MODE.LINES : node.material.__drawMode;
 							node.material.wireframe = this._wireframe || false;
 							const emissive = node.material.emissive;
