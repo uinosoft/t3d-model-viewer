@@ -50,8 +50,6 @@ export class App {
 		dropzone.on('dropstart', () => this.showSpinner());
 		dropzone.on('droperror', () => this.hideSpinner());
 
-		this.hideSpinner();
-
 		// Prepare built-in models
 		for (const { name, uri } of modelList.array) {
 			document.querySelector(`#model-${name}`).onclick = () => {
@@ -73,6 +71,15 @@ export class App {
 		window.addEventListener('resize', () => {
 			this.viewer && this.viewer.resize();
 		}, true);
+
+		// Handle URL parameters
+		const params = new URLSearchParams(location.search);
+		if (params.has('model')) {
+			const uri = params.get('model');
+			this.view(uri);
+		} else {
+			this.hideSpinner();
+		}
 	}
 
 	showSpinner() {
