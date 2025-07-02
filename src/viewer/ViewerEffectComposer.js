@@ -2,8 +2,6 @@ import { TEXEL_ENCODING_TYPE, Color3, ShaderMaterial, Geometry } from 't3d';
 import { GeometryUtils } from 't3d/addons/geometries/GeometryUtils.js';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
 import { DefaultEffectComposer, GBufferDebugger, SSAODebugger, SSRDebugger, RenderListMask, ToneMappingEffect, ToneMappingType, TAAEffect, AccumulationBuffer } from 't3d-effect-composer';
-import { TransmissionBuffer } from 't3d-effect-composer/addons/transmission/TransmissionBuffer.js';
-import { TransmissionEffect } from 't3d-effect-composer/addons/transmission/TransmissionEffect.js';
 import GTAOEffect from 't3d-effect-composer/addons/gtao/GTAOEffect.js';
 import GTAODebugger from 't3d-effect-composer/addons/gtao/GTAODebugger.js';
 import { UVBuffer } from 't3d-effect-composer/addons/uv/UVBuffer.js';
@@ -37,7 +35,6 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 
 		this.getBuffer('SceneBuffer').setOutputEncoding(TEXEL_ENCODING_TYPE.SRGB);
 		this.getBuffer('ColorMarkBuffer').setMaterialReplaceFunction(defaultMaterialReplaceFunction);
-		this.addBuffer('TransmissionBuffer', new TransmissionBuffer(width, height, options));
 		this.addBuffer('UVBuffer', new UVBuffer(width, height, { uvCheckTexture }));
 		this.addBuffer('LensflareBuffer', new LensflareBuffer(width, height, options));
 		this._syncAttachments();
@@ -52,14 +49,12 @@ export class ViewerEffectComposer extends DefaultEffectComposer {
 			{ id: 2, mask: RenderListMask.ALL }, // background
 			{ id: 0, mask: RenderListMask.ALL }
 		];
+		this.getBuffer('SceneBuffer').postRenderLayers.transmission.id = 20;
 
 		this.getEffect('Glow').bufferDependencies = [
 			{ key: 'SceneBuffer' },
 			{ key: 'ColorMarkBuffer', mask: RenderListMask.ALL }
 		];
-
-		this.addEffect('Transmission', new TransmissionEffect(), -1);
-		this.getEffect('Transmission').active = false;
 
 		this.addEffect('GTAO', new GTAOEffect(), 0.5);
 
@@ -357,43 +352,3 @@ function getWireframeGeometry(geometry) {
 		return wireframeGeometry;
 	}
 }
-
-// fix transmission depth clear
-TransmissionBuffer.prototype.render = function(renderer, composer, scene, camera) {
-	if (!this.needRender()) return;
-
-	const useMSAA = composer.$useMSAA;
-	const renderTarget = useMSAA ? this._mrt : this._rt;
-
-	renderer.setRenderTarget(renderTarget);
-	renderer.setClearColor(0, 0, 0, 0);
-	renderer.clear(true, false, false);
-
-	const renderStates = scene.getRenderStates(camera);
-	const renderQueue = scene.getRenderQueue(camera);
-
-	const renderOptions = this._renderOptions;
-
-	renderer.beginRender();
-
-	const renderLayers = this.renderLayers;
-	for (let i = 0, l = renderLayers.length; i < l; i++) {
-		const { id, mask } = renderLayers[i];
-		const layer = renderQueue.getLayer(id);
-		if (layer) {
-			if (layer.opaqueCount > 0 && (mask & RenderListMask.OPAQUE)) {
-				renderer.renderRenderableList(layer.opaque, renderStates, renderOptions);
-			}
-			if (layer.transparentCount > 0 && (mask & RenderListMask.TRANSPARENT)) {
-				renderer.renderRenderableList(layer.transparent, renderStates, renderOptions);
-			}
-		}
-	}
-
-	renderer.endRender();
-
-	if (useMSAA) {
-		renderer.setRenderTarget(this._rt);
-		renderer.blitRenderTarget(this._mrt, this._rt, true, true, true);
-	}
-};

@@ -307,7 +307,7 @@ export class Viewer {
 
 					blobURLs.forEach(URL.revokeObjectURL);
 
-					let transmission = false, glow = false;
+					let glow = false;
 
 					const root = gltf.root;
 					root.traverse(node => {
@@ -333,7 +333,6 @@ export class Viewer {
 							}
 							if (node.material.shaderName === 'TransmissionPBR') {
 								node.renderLayer = 20;
-								transmission = true;
 							}
 						}
 
@@ -358,7 +357,6 @@ export class Viewer {
 
 					this._ground.fitSize(this._modelBounds.diagonal);
 
-					this._effectComposer.getEffect('Transmission').active = transmission;
 					this._effectComposer.getEffect('Glow').active = glow;
 
 					this._root = root;
