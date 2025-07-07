@@ -1,6 +1,6 @@
 {
   "name": "t3d-model-viewer",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "A model viewer based on t3d.js",
   "author": "uino",
   "license": "BSD-3-Clause",
