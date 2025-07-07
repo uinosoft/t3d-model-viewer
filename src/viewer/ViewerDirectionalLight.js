@@ -1,6 +1,6 @@
-import { DirectionalLight, Color3, Spherical, Vector3, Sphere } from 't3d';
+import { DirectionalLight, Color3, Spherical, Vector3 } from 't3d';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
-import { ShadowAdapter } from 't3d/addons/math/ShadowAdapter.js';
+import { LightShadowAdapter } from 't3d/addons/lights/LightShadowAdapter.js';
 
 import { LensflareMarker } from 't3d-effect-composer/addons/lensflare/LensflareMarker.js';
 
@@ -26,6 +26,10 @@ export class ViewerDirectionalLight extends DirectionalLight {
 
 		this._phi = 0;
 		this._theta = 0;
+
+		this._adapter = new LightShadowAdapter(this);
+		this._adapter.shadowDepthFunction = function(depth, size) { return Math.max(depth * 2.5, size * 0.8) };
+		this._adapter.shadowOffsetFactor.y = 0.8;
 
 		this.setDirection({ x: 30, y: 40 });
 		this._updateDirection(10);
@@ -57,14 +61,15 @@ export class ViewerDirectionalLight extends DirectionalLight {
 
 	_updateDirectionByShadowAdapter(camera, modelBounds) {
 		const { box, diameter } = modelBounds;
-		ShadowAdapter.getSphereByBox3AndCamera(box, camera, 1, diameter * this.shadowDistanceScale, _shadowAdapterSphere);
-		ShadowAdapter.setDirectionalLight(this, this._phi, this._theta, _shadowAdapterSphere);
-		this.shadow.cameraFar = this.shadow.cameraNear + diameter * 2.5; // fix camera length
+		this._adapter.bindBox.fromBox3(box);
+		this._adapter.bindCamera = camera;
+		this._adapter.bindCameraDistance = diameter * this.shadowDistanceScale;
+		this._adapter.direction.setFromSphericalAngles(this._phi, this._theta);
+		this._adapter.update();
 	}
 
 }
 
-const _shadowAdapterSphere = new Sphere();
 const _spherical = new Spherical();
 const _target = new Vector3();
 const _up = new Vector3(0, 1, 0);
