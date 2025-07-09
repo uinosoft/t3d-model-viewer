@@ -16,6 +16,20 @@ export class GLTFModelLoader extends GLTFLoader {
 	constructor(manager, renderer) {
 		super(manager);
 
+		// some material extensions are mutually exclusive,
+		// so we move the more important ones to the front.
+		this.autoParseConfig = {
+			materials: [
+				'KHR_materials_unlit',
+				'KHR_materials_transmission',
+				'KHR_materials_ior',
+				'KHR_materials_volume',
+				'KHR_materials_dispersion',
+				'KHR_materials_clearcoat',
+				'KHR_materials_pbrSpecularGlossiness'
+			]
+		};
+
 		const dracoLoader = new DRACOLoader();
 		dracoLoader.setDecoderPath('./libs/draco/');
 
