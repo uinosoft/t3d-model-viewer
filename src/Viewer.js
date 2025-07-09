@@ -327,6 +327,10 @@ export class Viewer {
 								node.effects = { 'Glow': 1 };
 								glow = true;
 							}
+							const diffuseMap = node.material.diffuseMap;
+							if (diffuseMap) {
+								diffuseMap.anisotropy = this._renderer.capabilities.maxAnisotropy;
+							}
 							if (node.material.type === 'basic') {
 								// remove envMap effect for basic material
 								node.material.envMap = undefined;
