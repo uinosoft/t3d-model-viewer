@@ -33,8 +33,7 @@ export class GLTFModelLoader extends GLTFLoader {
 		const dracoLoader = new DRACOLoader();
 		dracoLoader.setDecoderPath('./libs/draco/');
 
-		const zstdDecoder = new ZSTDDecoder().init();
-		KTX2Loader.setKTXParser(KTXParse).setZSTDDecoder(zstdDecoder);
+		KTX2Loader.setKTXParser(KTXParse).setZSTDDecoder(ZSTDDecoder);
 		const ktx2Loader = new KTX2Loader()
 			.setTranscoderPath('./libs/basis/')
 			.detectSupport(renderer);

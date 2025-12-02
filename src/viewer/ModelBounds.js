@@ -56,8 +56,8 @@ function getBoundingBox(object, rootBones, target) {
 	object.traverse(node => {
 		if (node.geometry) {
 			if (node.isSkinnedMesh) {
-				node.geometry.computeBoundingBox();
-				_childBox.copy(node.geometry.boundingBox);
+				computeBoundingBox(node, _childBox, _pos);
+				node.geometry.boundingBox.copy(_childBox);
 				rootBones.forEach(rootbone => {
 					const rootIndex = node.skeleton.bones.indexOf(rootbone);
 					if (rootIndex !== -1) {
@@ -71,8 +71,9 @@ function getBoundingBox(object, rootBones, target) {
 				_childBox.applyMatrix4(node.worldMatrix);
 				target.expandByBox3(_childBox);
 			} else {
-				node.geometry.computeBoundingBox();
-				_childBox.copy(node.geometry.boundingBox).applyMatrix4(node.worldMatrix);
+				computeBoundingBox(node, _childBox, _pos);
+				node.geometry.boundingBox.copy(_childBox);
+				_childBox.applyMatrix4(node.worldMatrix);
 				target.expandByBox3(_childBox);
 			}
 		}
@@ -81,24 +82,39 @@ function getBoundingBox(object, rootBones, target) {
 	return target;
 }
 
-// morphTransform
-// if (node.morphTargetInfluences)
-const _morph = new Vector3();
-const _temp = new Vector3();
+function computeBoundingBox(node, childBox, pos) {
+	const position = node.geometry.attributes['a_Position'] || node.geometry.attributes['position'];
+	childBox.makeEmpty();
+	if (position) {
+		const { array, stride } = position.buffer;
+		const { offset, normalized } = position;
+
+		for (let i = 0, l = array.length; i < l; i += stride) {
+			pos.fromArray(array, i + offset, normalized);
+			childBox.expandByPoint(pos);
+		}
+	}
+}
 
 function morphTransform(node, childBox, pos) {
 	const index = node.geometry.index.buffer.array;
 	const position = node.geometry.getAttribute('a_Position');
 	childBox.makeEmpty();
-	for (let i = 0; i < index.length; i += 1) {
-		const a = index[i];
-		pos.fromArray(position.buffer.array, a * 3);
-		morphNodeTransform(node, a, pos);
-		childBox.expandByPoint(pos);
+	if (position) {
+		const { array, stride } = position.buffer;
+		const { offset, normalized } = position;
+		for (let i = 0; i < index.length; i += 1) {
+			const a = index[i];
+			pos.fromArray(array, a * stride + offset, normalized);
+			morphNodeTransform(node, a, pos);
+			childBox.expandByPoint(pos);
+		}
 	}
 	return childBox;
 }
 
+const _morph = new Vector3();
+const _temp = new Vector3();
 function morphNodeTransform(object, index, target) {
 	const morphPosition = object.geometry.morphAttributes.position;
 	const morphInfluences = object.morphTargetInfluences;
@@ -108,7 +124,7 @@ function morphNodeTransform(object, index, target) {
 		const influence = morphInfluences[i];
 		const morphAttribute = morphPosition[i];
 		if (influence === 0 || influence - 0 < Number.EPSILON) continue;
-		_temp.fromArray(morphAttribute.buffer.array, index * 3);
+		_temp.fromArray(morphAttribute.buffer.array, index * 3, morphAttribute.normalized);
 		_morph.addScaledVector(_temp, influence);
 	}
 	target.add(_morph);

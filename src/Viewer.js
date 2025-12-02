@@ -1,6 +1,6 @@
-import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, RenderTargetBack, ShadowMapPass, Scene, Camera,
+import { WebGLRenderer, AnimationMixer, AnimationAction, LoadingManager, ScreenRenderTarget, ShadowMapPass, Scene, Camera,
 	Vector3, Vector2, Mesh, AmbientLight, DirectionalLight, TEXEL_ENCODING_TYPE,
-	DRAW_MODE, Spherical, SphereGeometry, PBRMaterial } from 't3d';
+	DRAW_MODE, Spherical, SphereGeometry, PBRMaterial, Raycaster } from 't3d';
 import { OrbitControls } from 't3d/addons/controls/OrbitControls.js';
 import { Texture2DLoader } from 't3d/addons/loaders/Texture2DLoader.js';
 import { RGBETexture2DLoader } from 't3d/addons/loaders/RGBELoader.js';
@@ -8,7 +8,6 @@ import { EXRTexture2DLoader } from 't3d/addons/loaders/EXRLoader.js';
 import { PMREMGenerator } from 't3d/addons/textures/PMREMGenerator.js';
 import { Timer } from 't3d/addons/misc/Timer.js';
 import { SkyBox } from 't3d/addons/objects/SkyBox.js';
-import { Raycaster } from 't3d/addons/Raycaster.js';
 import { Box3Helper } from 't3d/addons/objects/Box3Helper.js';
 
 import { default as TWEEN } from '@tweenjs/tween.js';
@@ -46,12 +45,13 @@ export class Viewer {
 		});
 
 		const renderer = new WebGLRenderer(gl);
-		renderer.setClearColor(0.2, 0.2, 0.2, 1);
 
 		this.timer = new Timer();
 
-		const backRenderTarget = new RenderTargetBack(canvas);
-		backRenderTarget.resize(width, height);
+		const screenRenderTarget = new ScreenRenderTarget(canvas);
+		screenRenderTarget.resize(width, height);
+		screenRenderTarget.setColorClearValue(0.2, 0.2, 0.2, 1);
+		console.log(screenRenderTarget);
 
 		const shadowMapPass = new ShadowMapPass();
 		shadowMapPass.getGeometry = geometryReplaceFunction;
@@ -143,7 +143,7 @@ export class Viewer {
 		this._canvas = canvas;
 		this._gl = gl;
 		this._renderer = renderer;
-		this._backRenderTarget = backRenderTarget;
+		this._screenRenderTarget = screenRenderTarget;
 		this._shadowMapPass = shadowMapPass;
 		this._effectComposer = effectComposer;
 		this._scene = scene;
@@ -216,7 +216,7 @@ export class Viewer {
 
 		this._scene.updateMatrix();
 		this._scene.updateRenderStates(this._camera);
-		this._scene.updateRenderQueue(this._camera);
+		const renderQueue = this._scene.updateRenderQueue(this._camera);
 
 		this.timer.update(timestamp);
 
@@ -238,6 +238,9 @@ export class Viewer {
 		const focalTargetViewPos = _vec3_1.copy(this._focalTarget.position).applyMatrix4(this._camera.viewMatrix);
 		this._effectComposer.updateDOFFocalDepth(-focalTargetViewPos.z);
 
+		const renderQueueLayer = renderQueue.getLayer(5);
+		this._effectComposer.getEffect('Lensflare').active = renderQueueLayer && renderQueueLayer.opaque.length > 0;
+
 		if (renderDirty) {
 			this._staticCount = 10;
 			this._dirty = false;
@@ -248,7 +251,7 @@ export class Viewer {
 			this._effectComposer.dirty();
 		}
 
-		this._effectComposer.render(this._renderer, this._scene, this._camera, this._backRenderTarget);
+		this._effectComposer.render(this._renderer, this._scene, this._camera, this._screenRenderTarget);
 	}
 
 	resize() {
@@ -267,7 +270,7 @@ export class Viewer {
 		} else {
 			this._camera.setOrtho(-diameter * 2, diameter * 2, -diameter * 2 * aspect, diameter * 2 * aspect, -this._cameraClip.far, this._cameraClip.far);
 		}
-		this._backRenderTarget.resize(width, height);
+		this._screenRenderTarget.resize(width, height);
 		this._effectComposer.resize(width, height);
 
 		this._dirty = true;
